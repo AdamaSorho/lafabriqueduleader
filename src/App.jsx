@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import img1 from './assets/image1.avif'
 import img2 from './assets/image2.avif'
 import img3 from './assets/image3.avif'
@@ -238,7 +239,7 @@ export default function App() {
 }
 
 function FAQItem({ q, a }) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = useState(false)
   return (
     <div className="rounded-2xl border border-black/10">
       <button
