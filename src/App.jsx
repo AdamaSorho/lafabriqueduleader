@@ -62,7 +62,7 @@ function Hero() {
 
 function Section({ id, eyebrow, title, children }) {
   return (
-    <section id={id} className="relative isolate bg-white py-16 sm:py-20">
+    <section id={id} className="relative isolate bg-white py-16 sm:py-20 scroll-mt-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           {eyebrow && (
@@ -193,7 +193,7 @@ function Footer() {
 
 export default function App() {
   return (
-    <div className="min-h-full bg-white text-gray-900">
+    <div className="min-h-full bg-white text-gray-900 font-sans">
       <Nav />
       <main>
         <Hero />
@@ -201,7 +201,7 @@ export default function App() {
           <div className="grid gap-6 md:grid-cols-2">
             {[img1, img2, img3, img4, img5, img6].map((src, i) => (
               <figure key={i} className="group overflow-hidden rounded-3xl border border-black/10">
-                <img src={src} alt={`Projet ${i + 1}`} className="aspect-[16/10] w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
+                <img src={src} alt={`Projet ${i + 1}`} className="aspect-[16/10] w-full object-cover transition duration-300 ease-out group-hover:scale-[1.02]" />
               </figure>
             ))}
           </div>
@@ -221,12 +221,85 @@ export default function App() {
             </p>
           </div>
         </Section>
+        <Section id="faq" eyebrow="Questions" title="Questions fréquentes">
+          <FAQ />
+        </Section>
         <Section id="temoignages" eyebrow="Témoignages" title="Ce que disent nos client·es">
           <Testimonials />
+        </Section>
+        <Section id="contact" eyebrow="Contact" title="Parlons de vos enjeux">
+          <Contact />
         </Section>
         <CTA />
       </main>
       <Footer />
     </div>
+  )
+}
+
+function FAQItem({ q, a }) {
+  const [open, setOpen] = React.useState(false)
+  return (
+    <div className="rounded-2xl border border-black/10">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-gray-50"
+        aria-expanded={open}
+      >
+        <span className="text-sm font-medium text-gray-900">{q}</span>
+        <span className="text-gray-400 transition-transform duration-200" style={{ transform: open ? 'rotate(45deg)' : 'rotate(0deg)' }}>+</span>
+      </button>
+      {open && (
+        <div className="px-5 pb-5 text-sm text-gray-700">{a}</div>
+      )}
+    </div>
+  )
+}
+
+function FAQ() {
+  const items = [
+    {
+      q: 'Quel est le format typique d’un accompagnement ?',
+      a: 'Nous proposons des formats de 6 à 12 semaines, combinant sessions individuelles, ateliers d’équipe et travail entre les séances.'
+    },
+    {
+      q: 'Intervenez-vous en présentiel et à distance ?',
+      a: 'Oui. Nous combinons présentiel et visio selon les besoins, avec une logistique simple et efficace.'
+    },
+    {
+      q: 'Quels sont vos tarifs ?',
+      a: 'Ils dépendent du format et de l’ampleur de la mission. Nous partageons une proposition claire après un premier échange.'
+    },
+  ]
+  return (
+    <div className="grid gap-3">
+      {items.map((it) => (
+        <FAQItem key={it.q} q={it.q} a={it.a} />
+      ))}
+    </div>
+  )
+}
+
+function Contact() {
+  return (
+    <form className="mx-auto grid max-w-2xl gap-4">
+      <div className="grid gap-1">
+        <label htmlFor="name" className="text-xs font-medium text-gray-700">Nom</label>
+        <input id="name" name="name" type="text" required className="rounded-xl border border-black/10 px-3 py-2 text-sm outline-none transition placeholder:text-gray-400 focus:ring-2 focus:ring-black/10" placeholder="Votre nom" />
+      </div>
+      <div className="grid gap-1">
+        <label htmlFor="email" className="text-xs font-medium text-gray-700">Email</label>
+        <input id="email" name="email" type="email" required className="rounded-xl border border-black/10 px-3 py-2 text-sm outline-none transition placeholder:text-gray-400 focus:ring-2 focus:ring-black/10" placeholder="vous@exemple.com" />
+      </div>
+      <div className="grid gap-1">
+        <label htmlFor="message" className="text-xs font-medium text-gray-700">Message</label>
+        <textarea id="message" name="message" rows={5} required className="resize-y rounded-xl border border-black/10 px-3 py-2 text-sm outline-none transition placeholder:text-gray-400 focus:ring-2 focus:ring-black/10" placeholder="Quelques mots sur vos enjeux" />
+      </div>
+      <div className="flex items-center gap-3">
+        <button type="submit" className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-black/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20">Envoyer</button>
+        <a href="mailto:contact@lafabriqueduleader.com" className="text-sm text-gray-600 hover:text-gray-900">ou nous écrire directement</a>
+      </div>
+    </form>
   )
 }
