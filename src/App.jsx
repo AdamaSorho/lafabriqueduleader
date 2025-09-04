@@ -9,16 +9,16 @@ import author from './assets/author.avif'
 function Nav() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <div className="size-7 rounded bg-black" aria-hidden />
-          <span className="font-semibold">La Fabrique du Leader</span>
+          <span className="font-semibold tracking-tight">La Fabrique du Leader</span>
         </div>
         <div className="hidden items-center gap-8 md:flex">
-          <a href="#programmes" className="text-sm font-medium text-gray-700 hover:text-black">Programmes</a>
-          <a href="#approche" className="text-sm font-medium text-gray-700 hover:text-black">Approche</a>
+          <a href="#work" className="text-sm font-medium text-gray-700 hover:text-black">Réalisations</a>
+          <a href="#services" className="text-sm font-medium text-gray-700 hover:text-black">Services</a>
+          <a href="#about" className="text-sm font-medium text-gray-700 hover:text-black">À propos</a>
           <a href="#temoignages" className="text-sm font-medium text-gray-700 hover:text-black">Témoignages</a>
-          <a href="#contact" className="text-sm font-medium text-gray-700 hover:text-black">Contact</a>
         </div>
         <a href="#contact" className="inline-flex items-center rounded-full bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-black/90">Nous rejoindre</a>
       </nav>
@@ -28,31 +28,28 @@ function Nav() {
 
 function Hero() {
   return (
-    <section className="relative isolate overflow-hidden bg-white pt-28 sm:pt-32">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-        <div className="max-w-xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
-            <span className="size-1.5 rounded-full bg-emerald-500" />
-            Coaching • Formation • Conseil
-          </span>
-          <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
-            Forgez un leadership clair, humain et puissant.
-          </h1>
-          <p className="mt-5 text-base text-gray-600 sm:text-lg">
-            Nous accompagnons dirigeant·es et équipes à développer la clarté, la confiance et l’impact au quotidien.
-          </p>
-          <div className="mt-8 flex items-center gap-3">
-            <a href="#contact" className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-black/90">Parler à un coach</a>
-            <a href="#programmes" className="inline-flex items-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50">Découvrir nos programmes</a>
+    <section className="relative isolate overflow-hidden bg-white pt-28 sm:pt-36">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
+          <div className="max-w-xl">
+            <p className="text-xs uppercase tracking-widest text-gray-500">Coaching • Conseil • Formation</p>
+            <h1 className="mt-5 font-serif text-5xl italic leading-tight tracking-tight text-gray-900 sm:text-6xl md:text-7xl">
+              Forgez un leadership clair,<br className="hidden sm:block" /> humain et puissant.
+            </h1>
+            <p className="mt-6 text-base text-gray-600 sm:text-lg">
+              Nous accompagnons dirigeant·es et équipes à développer la clarté, la confiance et l’impact au quotidien.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <a href="#contact" className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-black/90">Parler à un coach</a>
+              <a href="#work" className="inline-flex items-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50">Voir nos réalisations</a>
+            </div>
+          </div>
+          <div className="relative">
+            <img src={img1} alt="Visuel de présentation" className="w-full rounded-3xl border border-black/10 object-cover shadow-sm" />
+            <div className="pointer-events-none absolute inset-0 -z-10 rounded-3xl bg-[radial-gradient(60%_80%_at_50%_0%,rgba(0,0,0,0.06),transparent)]" />
           </div>
         </div>
-        <div className="relative">
-          <img src={img1} alt="Coaching en action" className="w-full rounded-3xl border border-black/10 object-cover shadow-sm" />
-          <div className="pointer-events-none absolute inset-0 -z-10 rounded-3xl bg-[radial-gradient(60%_80%_at_50%_0%,rgba(0,0,0,0.06),transparent)]" />
-        </div>
-      </div>
-      <div className="mx-auto mt-10 max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
+        <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
           {[img2, img3, img4, img5, img6].map((src, idx) => (
             <img key={idx} src={src} alt="Illustration" className="h-24 w-full rounded-xl border border-black/10 object-cover" />
           ))}
@@ -71,7 +68,7 @@ function Section({ id, eyebrow, title, children }) {
           {eyebrow && (
             <div className="text-xs font-semibold uppercase tracking-widest text-gray-500">{eyebrow}</div>
           )}
-          <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl md:text-4xl">{title}</h2>
+          <h2 className="mt-3 font-serif text-3xl italic tracking-tight text-gray-900 sm:text-4xl md:text-5xl">{title}</h2>
         </div>
         <div className="mx-auto mt-10 max-w-5xl">
           {children}
@@ -112,19 +109,22 @@ function Features() {
 
 function Programs() {
   const items = [
-    { name: 'Coaching dirigeants', desc: 'Accompagnement individuel sur-mesure pour dirigeants et fondatrices/fondateurs.' },
-    { name: 'Coaching d’équipe', desc: 'Alignement, performance collective et qualité relationnelle.' },
-    { name: 'Formations', desc: 'Ateliers pratiques: feedback, décision, priorisation, communication, posture.' },
+    { name: 'Coaching dirigeants', desc: 'Accompagnement individuel sur-mesure pour dirigeants, fondatrices et fondateurs.' },
+    { name: 'Coaching d’équipe', desc: 'Alignement stratégique, performance collective, qualité relationnelle.' },
+    { name: 'Formations', desc: 'Feedback, décision, priorisation, communication, posture managériale.' },
   ]
   return (
-    <div className="grid gap-6 md:grid-cols-3">
+    <div id="services" className="grid gap-6 md:grid-cols-3">
       {items.map((p) => (
-        <div key={p.name} className="flex flex-col justify-between rounded-2xl border border-black/10 p-6">
+        <div key={p.name} className="group flex flex-col justify-between rounded-3xl border border-black/10 p-6 transition hover:shadow-sm">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{p.name}</h3>
+            <h3 className="font-serif text-xl italic text-gray-900">{p.name}</h3>
             <p className="mt-2 text-sm text-gray-600">{p.desc}</p>
           </div>
-          <a href="#contact" className="mt-6 inline-flex w-fit items-center rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50">En savoir plus</a>
+          <a href="#contact" className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50">
+            En savoir plus
+            <span className="text-[--accent]">→</span>
+          </a>
         </div>
       ))}
     </div>
@@ -149,12 +149,12 @@ function Testimonials() {
   return (
     <div className="grid gap-6 md:grid-cols-3">
       {quotes.map((q, i) => (
-        <figure key={i} className="rounded-2xl border border-black/10 bg-white p-6">
-          <div className="flex items-center gap-3">
+        <figure key={i} className="rounded-3xl border border-black/10 bg-white p-6">
+          <blockquote className="text-sm text-gray-700">“{q.text}”</blockquote>
+          <figcaption className="mt-4 flex items-center gap-3">
             <img src={author} alt="Auteur" className="size-9 rounded-full object-cover" />
-            <figcaption className="text-xs font-semibold text-gray-700">{q.name}</figcaption>
-          </div>
-          <blockquote className="mt-3 text-sm text-gray-700">“{q.text}”</blockquote>
+            <span className="text-xs font-semibold text-gray-700">{q.name}</span>
+          </figcaption>
         </figure>
       ))}
     </div>
@@ -197,11 +197,29 @@ export default function App() {
       <Nav />
       <main>
         <Hero />
+        <Section id="work" eyebrow="Réalisations" title="Sélection de projets">
+          <div className="grid gap-6 md:grid-cols-2">
+            {[img1, img2, img3, img4, img5, img6].map((src, i) => (
+              <figure key={i} className="group overflow-hidden rounded-3xl border border-black/10">
+                <img src={src} alt={`Projet ${i + 1}`} className="aspect-[16/10] w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
+              </figure>
+            ))}
+          </div>
+        </Section>
         <Section id="approche" eyebrow="Notre approche" title="Concret, exigeant et profondément humain">
           <Features />
         </Section>
-        <Section id="programmes" eyebrow="Programmes" title="Des formats adaptés à vos enjeux">
+        <Section id="services" eyebrow="Services" title="Des formats adaptés à vos enjeux">
           <Programs />
+        </Section>
+        <Section id="about" eyebrow="À propos" title="Nous accompagnons celles et ceux qui construisent">
+          <div className="grid items-center gap-8 md:grid-cols-[auto,1fr]">
+            <img src={author} alt="Auteur" className="size-24 rounded-full object-cover md:size-28" />
+            <p className="text-sm text-gray-700">
+              Nous aidons dirigeant·es, fondatrices et équipes à gagner en clarté, en confiance et en impact.
+              Une approche pragmatique, humaine et durable, nourrie par l’expérience terrain.
+            </p>
+          </div>
         </Section>
         <Section id="temoignages" eyebrow="Témoignages" title="Ce que disent nos client·es">
           <Testimonials />
