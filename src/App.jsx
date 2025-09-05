@@ -58,6 +58,12 @@ function Nav({ lang, setLang, strings }) {
             {lang === "fr" ? "Pourquoi" : "Why"}
           </a>
           <a
+            href="#author"
+            className="text-sm font-medium text-gray-700 hover:text-black"
+          >
+            {lang === "fr" ? "Auteur" : "Author"}
+          </a>
+          <a
             href="#about"
             className="text-sm font-medium text-gray-700 hover:text-black"
           >
@@ -288,13 +294,11 @@ export default function App() {
         >
           <Why strings={strings} />
         </Section>
-        <Section
-          id="about"
-          eyebrow={strings.author.title}
-          title={strings.about.title}
-        >
+        <Section id="author" eyebrow={strings.hero.brand} title={strings.author.title}>
           <AboutAuthor strings={strings} />
-          <div className="mt-8 space-y-3 text-sm text-gray-700">
+        </Section>
+        <Section id="about" eyebrow={strings.hero.brand} title={strings.about.title}>
+          <div className="space-y-3 text-sm text-gray-700">
             {strings.about.body.map((p, i) => (
               <p key={i}>{p}</p>
             ))}
