@@ -72,6 +72,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   enabled             = true
   comment             = var.project
   default_root_object = "index.html"
+  aliases             = var.aliases
 
   origin {
     domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
@@ -93,9 +94,12 @@ resource "aws_cloudfront_distribution" "cdn" {
 
   restrictions { geo_restriction { restriction_type = "none" } }
 
-  # Default certificate by default. Set ACM in us-east-1 separately if needed.
+  # Default cert unless ACM provided (must be in us-east-1)
   viewer_certificate {
-    cloudfront_default_certificate = true
+    cloudfront_default_certificate = var.acm_certificate_arn == "" ? true : false
+    acm_certificate_arn            = var.acm_certificate_arn == "" ? null : var.acm_certificate_arn
+    ssl_support_method             = var.acm_certificate_arn == "" ? null : "sni-only"
+    minimum_protocol_version       = var.acm_certificate_arn == "" ? null : "TLSv1.2_2021"
   }
 
   custom_error_response {
@@ -118,12 +122,14 @@ resource "aws_cloudfront_distribution" "cdn" {
 ############################
 
 data "archive_file" "lambda_zip" {
+  count       = var.enable_api ? 1 : 0
   type        = "zip"
   source_dir  = "../../aws/lambda/subscribe-and-send"
   output_path = "./.terraform/${var.project}-lambda.zip"
 }
 
 resource "aws_iam_role" "lambda_exec" {
+  count              = var.enable_api ? 1 : 0
   name               = "${var.project}-lambda-exec"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -136,11 +142,13 @@ resource "aws_iam_role" "lambda_exec" {
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_basic" {
-  role       = aws_iam_role.lambda_exec.name
+  count      = var.enable_api ? 1 : 0
+  role       = aws_iam_role.lambda_exec[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_policy" "ses_send" {
+  count  = var.enable_api ? 1 : 0
   name   = "${var.project}-ses-send"
   policy = jsonencode({
     Version = "2012-10-17",
@@ -153,18 +161,20 @@ resource "aws_iam_policy" "ses_send" {
 }
 
 resource "aws_iam_role_policy_attachment" "ses_attach" {
-  role       = aws_iam_role.lambda_exec.name
-  policy_arn = aws_iam_policy.ses_send.arn
+  count      = var.enable_api ? 1 : 0
+  role       = aws_iam_role.lambda_exec[0].name
+  policy_arn = aws_iam_policy.ses_send[0].arn
 }
 
 resource "aws_lambda_function" "api" {
+  count         = var.enable_api ? 1 : 0
   function_name = "${var.project}-subscribe-and-send"
-  filename      = data.archive_file.lambda_zip.output_path
+  filename      = data.archive_file.lambda_zip[0].output_path
   handler       = "index.handler"
   runtime       = "nodejs20.x"
-  role          = aws_iam_role.lambda_exec.arn
+  role          = aws_iam_role.lambda_exec[0].arn
 
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  source_code_hash = data.archive_file.lambda_zip[0].output_base64sha256
 
   environment {
     variables = {
@@ -180,6 +190,7 @@ resource "aws_lambda_function" "api" {
 }
 
 resource "aws_apigatewayv2_api" "http" {
+  count         = var.enable_api ? 1 : 0
   name          = "${var.project}-http-api"
   protocol_type = "HTTP"
   cors_configuration {
@@ -190,32 +201,38 @@ resource "aws_apigatewayv2_api" "http" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {
-  api_id                 = aws_apigatewayv2_api.http.id
+  count                  = var.enable_api ? 1 : 0
+  api_id                 = aws_apigatewayv2_api.http[0].id
   integration_type       = "AWS_PROXY"
-  integration_uri        = aws_lambda_function.api.invoke_arn
+  integration_uri        = aws_lambda_function.api[0].invoke_arn
   payload_format_version = "2.0"
 }
 
 resource "aws_apigatewayv2_route" "post_subscribe" {
-  api_id    = aws_apigatewayv2_api.http.id
+  count     = var.enable_api ? 1 : 0
+  api_id    = aws_apigatewayv2_api.http[0].id
   route_key = "POST /subscribe-and-send"
-  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda[0].id}"
 }
 
 resource "aws_apigatewayv2_stage" "default" {
-  api_id      = aws_apigatewayv2_api.http.id
+  count       = var.enable_api ? 1 : 0
+  api_id      = aws_apigatewayv2_api.http[0].id
   name        = "$default"
   auto_deploy = true
 }
 
 resource "aws_lambda_permission" "apigw" {
+  count        = var.enable_api ? 1 : 0
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.api.arn
+  function_name = aws_lambda_function.api[0].arn
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.http.execution_arn}/*/*/subscribe-and-send"
+  source_arn    = "${aws_apigatewayv2_api.http[0].execution_arn}/*/*/subscribe-and-send"
 }
 
-output "api_base_url" { value = aws_apigatewayv2_api.http.api_endpoint }
+output "api_base_url" {
+  value = length(aws_apigatewayv2_api.http) > 0 ? aws_apigatewayv2_api.http[0].api_endpoint : ""
+}
 output "site_bucket" { value = aws_s3_bucket.site.bucket }
 output "cloudfront_domain" { value = aws_cloudfront_distribution.cdn.domain_name }

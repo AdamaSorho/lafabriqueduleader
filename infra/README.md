@@ -22,7 +22,8 @@ Files: `infra/terraform/*.tf`
 - Variables to set (via `terraform.tfvars` or CLI):
   - `region` (e.g., `us-east-1`)
   - `site_bucket_name` (unique bucket name)
-  - `acm_certificate_arn` (optional) — cert must be in `us-east-1` for CloudFront
+  - `aliases` (optional) — custom domains, e.g. `["lafabriqueduleader.com","www.lafabriqueduleader.com"]`
+  - `acm_certificate_arn` (optional) — ACM cert in `us-east-1` if you want HTTPS on those aliases now
   - `site_url` (e.g., `https://lafabriqueduleader.com`)
   - `from_email` (e.g., `La Fabrique <no-reply@yourdomain.com>`) — SES verified
   - `cors_origin` (e.g., your site URL)
@@ -41,7 +42,12 @@ Outputs:
 
 After apply:
 - Upload `dist/` to the S3 bucket (or wire CI/CD).
-- Set `VITE_API_BASE` to the `api_base_url` and rebuild the site.
+- Point DNS at Namecheap:
+  - If you add `aliases` but don’t have Route53:
+    - Create a CNAME for `www` to your `cloudfront_domain`.
+    - For the apex `lafabriqueduleader.com`, either use your provider’s ALIAS/ANAME pointing to the CloudFront domain or temporarily redirect apex → `www`.
+- If you provided an ACM cert (in us-east-1), validate it via DNS in Namecheap before applying aliases.
+- Set `SITE_URL` (frontend emails) to your domain and rebuild when you later enable the API.
 
 ## 2) AWS SAM
 
