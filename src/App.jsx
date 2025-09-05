@@ -476,7 +476,9 @@ function ExcerptModal({ open, onClose, lang }) {
     }
     setStatus('loading')
     try {
-      const res = await fetch('/api/subscribe-and-send', {
+      const base = (import.meta.env && import.meta.env.VITE_API_BASE) ? String(import.meta.env.VITE_API_BASE) : ''
+      const url = base ? `${base.replace(/\/$/, '')}/subscribe-and-send` : '/api/subscribe-and-send'
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, lang }),
