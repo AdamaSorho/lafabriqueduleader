@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { content } from "./content";
 import img1 from "./assets/image1.avif";
-import author from "./assets/author.avif";
+import author from "./assets/Soro.jpg";
 
 function useLang() {
   const [lang, setLang] = useState(() => {
