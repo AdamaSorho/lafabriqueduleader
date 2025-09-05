@@ -273,15 +273,8 @@ function Testimonials({ strings }) {
           className="rounded-3xl border border-black/10 bg-white p-6"
         >
           <blockquote className="text-sm text-gray-700">“{q.text}”</blockquote>
-          <figcaption className="mt-4 flex items-center gap-3">
-            <img
-              src={author}
-              alt="Auteur"
-              className="size-9 rounded-full object-cover"
-            />
-            <span className="text-xs font-semibold text-gray-700">
-              {q.name}
-            </span>
+          <figcaption className="mt-4 text-xs font-semibold text-gray-700">
+            {q.name}
           </figcaption>
         </figure>
       ))}

@@ -12,8 +12,8 @@ export const content = {
       lead: 'Et si c’était maintenant que votre leadership prenait une **nouvelle direction** ?',
       body: "La Fabrique du Leader n’est pas un simple manuel de management. C’est une **fabrique intérieure** : un chemin pour **aligner** votre **posture**, vos **compétences** et votre **caractère**.",
       bullets: [
-        '🔍 **Clarté intérieure** – Développez votre **conscience de soi**.',
-        '⚖️ **Alignement** – Transformez vos **valeurs** en **décisions cohérentes**.',
+        '🔍 **Clarté intérieure** – Développez votre conscience de soi.',
+        '⚖️ **Alignement** – Transformez vos valeurs en décisions cohérentes.',
         '🌍 **Impact** – Inspirez et influencez votre environnement.',
       ],
       cta: 'Je veux forger mon leadership',
@@ -96,8 +96,8 @@ export const content = {
       lead: 'What if now was the time for your leadership to take a **new direction**?',
       body: 'The Leader’s Factory is not just another management manual. It is an **inner workshop**: a path to **align** your **mindset**, **skills**, and **character**.',
       bullets: [
-        '🔍 **Clarity** – Develop deeper **self-awareness**.',
-        '⚖️ **Alignment** – Turn your **values** into **coherent decisions**.',
+        '🔍 **Clarity** – Develop deeper self-awareness.',
+        '⚖️ **Alignment** – Turn your values into coherent decisions.',
         '🌍 **Impact** – Inspire and positively influence your environment.',
       ],
       cta: 'I want to forge my leadership',
