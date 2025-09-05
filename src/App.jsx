@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { content } from "./content";
 import img1 from "./assets/image1.avif";
-// import img2 from "./assets/image2.avif";
-// import img3 from "./assets/image3.avif";
-// import img4 from "./assets/image4.avif";
-// import img5 from "./assets/image5.avif";
-// import img6 from "./assets/image6.avif";
 import author from "./assets/author.avif";
 
 function useLang() {
@@ -95,7 +90,7 @@ function Nav({ lang, setLang, strings }) {
   );
 }
 
-function Hero({ strings }) {
+function Hero({ strings, onOpenExcerpt }) {
   return (
     <section className="relative isolate overflow-hidden bg-white pt-28 sm:pt-36">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -117,12 +112,13 @@ function Hero({ strings }) {
               >
                 {strings.hero.ctas.preorder}
               </a>
-              <a
-                href="#excerpt"
+              <button
+                type="button"
+                onClick={onOpenExcerpt}
                 className="inline-flex items-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50"
               >
                 {strings.hero.ctas.excerpt}
-              </a>
+              </button>
             </div>
           </div>
           <div className="relative">
@@ -232,7 +228,7 @@ function Testimonials({ strings }) {
   );
 }
 
-function CTA({ strings }) {
+function CTA({ strings, onOpenExcerpt }) {
   return (
     <section className="relative isolate mx-4 my-20 rounded-3xl bg-gray-900 px-6 py-14 text-white sm:mx-auto sm:max-w-7xl sm:px-12">
       <div className="mx-auto max-w-3xl text-center">
@@ -247,12 +243,13 @@ function CTA({ strings }) {
           >
             {strings.finalCta.ctas.preorder}
           </a>
-          <a
-            href="#excerpt"
+          <button
+            type="button"
+            onClick={onOpenExcerpt}
             className="inline-flex items-center rounded-full border border-white/20 px-5 py-3 text-sm font-semibold hover:bg-white/10"
           >
             {strings.finalCta.ctas.excerpt}
-          </a>
+          </button>
         </div>
       </div>
       <div className="pointer-events-none absolute inset-0 -z-10 rounded-3xl bg-[radial-gradient(60%_80%_at_50%_0%,rgba(255,255,255,0.15),transparent)]" />
@@ -278,11 +275,12 @@ function Footer() {
 
 export default function App() {
   const { lang, setLang, strings } = useLang();
+  const [excerptOpen, setExcerptOpen] = useState(false);
   return (
     <div className="min-h-full bg-white text-gray-900 font-sans">
       <Nav lang={lang} setLang={setLang} strings={strings} />
       <main>
-        <Hero strings={strings} />
+        <Hero strings={strings} onOpenExcerpt={() => setExcerptOpen(true)} />
         <Section
           id="why"
           eyebrow={strings.hero.brand}
@@ -346,7 +344,7 @@ export default function App() {
         >
           <FAQ strings={strings} />
         </Section>
-        <CTA strings={strings} />
+        <CTA strings={strings} onOpenExcerpt={() => setExcerptOpen(true)} />
         <Section
           id="contact"
           eyebrow={strings.footer.contact}
@@ -356,6 +354,7 @@ export default function App() {
         </Section>
       </main>
       <Footer />
+      <ExcerptModal open={excerptOpen} onClose={() => setExcerptOpen(false)} lang={lang} />
     </div>
   );
 }
@@ -454,4 +453,104 @@ function Contact({ lang }) {
       </div>
     </form>
   );
+}
+
+function ExcerptModal({ open, onClose, lang }) {
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState('idle') // idle | loading | success | error
+  const [message, setMessage] = useState('')
+
+  if (!open) return null
+
+  const t = (fr, en) => (lang === 'fr' ? fr : en)
+
+  const onSubmit = async (e) => {
+    e.preventDefault()
+    setMessage('')
+    // basic email validation
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    if (!ok) {
+      setMessage(t('Merci d’entrer un email valide.', 'Please enter a valid email.'))
+      setStatus('error')
+      return
+    }
+    setStatus('loading')
+    try {
+      const res = await fetch('/api/subscribe-and-send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, lang }),
+      })
+      if (res.ok) {
+        setStatus('success')
+        setMessage(
+          t(
+            'Merci ! Consultez votre boîte mail pour le lien de téléchargement.',
+            'Thank you! Check your inbox for the download link.'
+          )
+        )
+        setEmail('')
+      } else {
+        const txt = await res.text().catch(() => '')
+        setStatus('error')
+        setMessage(
+          t(
+            `Une erreur est survenue. Réessayez ou écrivez-nous: contact@lafabriqueduleader.com. ${txt}`,
+            `Something went wrong. Try again or email us: contact@lafabriqueduleader.com. ${txt}`
+          )
+        )
+      }
+    } catch (err) {
+      setStatus('error')
+      setMessage(
+        t(
+          'Réseau indisponible. Réessayez plus tard ou contactez-nous.',
+          'Network unavailable. Please try later or contact us.'
+        )
+      )
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">{t('Télécharger un extrait', 'Download an excerpt')}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">×</button>
+        </div>
+        <p className="mt-2 text-sm text-gray-600">
+          {t(
+            'Entrez votre email pour recevoir le lien de téléchargement. Nous pourrons aussi vous écrire pour des nouvelles liées au livre (désinscription possible à tout moment).',
+            'Enter your email to receive the download link. We may also email you book-related updates (unsubscribe anytime).'
+          )}
+        </p>
+        <form className="mt-4 grid gap-3" onSubmit={onSubmit}>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t('vous@exemple.com', 'you@example.com')}
+            required
+            className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none transition placeholder:text-gray-400 focus:ring-2 focus:ring-black/10"
+          />
+          <button
+            type="submit"
+            disabled={status === 'loading'}
+            className="inline-flex items-center justify-center rounded-full bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-black/90 disabled:opacity-60"
+          >
+            {status === 'loading' ? t('Envoi…', 'Sending…') : t('Envoyer le lien', 'Send the link')}
+          </button>
+          {message && (
+            <div className={`text-xs ${status === 'error' ? 'text-red-600' : 'text-emerald-600'}`}>{message}</div>
+          )}
+          <div className="text-[11px] text-gray-500">
+            {t(
+              'En soumettant, vous acceptez de recevoir des emails de notre part. Vos données ne seront pas partagées. Désinscription à tout moment.',
+              'By submitting, you agree to receive emails from us. We do not share your data. Unsubscribe anytime.'
+            )}
+          </div>
+        </form>
+      </div>
+    </div>
+  )
 }
