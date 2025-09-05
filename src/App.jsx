@@ -193,6 +193,13 @@ function Why({ strings }) {
 
 function AuthorSection({ strings }) {
   const paras = strings.author.body || []
+  const formatInline = (text) => {
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    let html = esc(text)
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>')
+    return { __html: html }
+  }
   return (
     <section id="author" className="relative isolate py-10 sm:py-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -211,7 +218,7 @@ function AuthorSection({ strings }) {
               </h2>
               <div className="mt-5 space-y-4 text-base leading-7 text-white/90">
                 {paras.map((p, i) => (
-                  <p key={i}>{p}</p>
+                  <p key={i} dangerouslySetInnerHTML={formatInline(p)} />
                 ))}
               </div>
             </div>

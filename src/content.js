@@ -21,10 +21,12 @@ export const content = {
     author: {
       title: 'Rencontrez Coach Zed',
       body: [
-        'D. Zonzerigué Soro, connu comme Coach Zed, est fondateur de La Fabrique des Leaders et auteur de La Fabrique du Leader.',
-        'Conférencier et formateur, il accompagne depuis plus d’une décennie des dirigeants, entrepreneurs et organisations en Afrique et à l’international.',
-        'Convaincu que le leadership véritable commence par une transformation intérieure, il aide chacun à développer la lucidité, l’alignement et la force de caractère nécessaires pour inspirer et transformer son environnement.',
-        'À travers ses conférences, ses programmes et ses écrits, il incarne une vision exigeante et universelle du leadership : un chemin de croissance personnelle qui devient un impact collectif durable.',
+        'Fondateur de La Fabrique des Leaders, formateur, conférencier et auteur engagé, D. Zonzerigué Soro accompagne celles et ceux qui veulent allier **exigence intérieure**, **impact durable** et **alignement profond** dans leur vie personnelle, communautaire et professionnelle. Il a choisi de quitter les sentiers tracés pour répondre à une question essentielle :',
+        '*Quel type de leader suis-je en train de devenir ? Et suis‑je encore fidèle à ce qui m’anime ?*',
+        'Ce livre est le fruit d’un cheminement personnel, mais surtout d’une conviction :',
+        '**Le leadership transformationnel commence par soi — ou il ne transforme rien.**',
+        'À travers ce livre, il transmet une vision du leadership ancrée, humaine, structurée. Pas une recette. Un chemin.',
+        '*Celui de celles et ceux qui osent se forger de l’intérieur pour mieux éclairer le monde autour d’eux.*',
       ],
     },
     about: {
@@ -103,10 +105,12 @@ export const content = {
     author: {
       title: 'Meet Coach Zed',
       body: [
-        'D. Zonzerigué Soro, also known as Coach Zed, is the founder of The Leaders’ Factory and author of The Leader’s Factory.',
-        'A speaker and trainer, he has been working for over a decade with executives, entrepreneurs, and organizations across Africa and internationally.',
-        'Convinced that true leadership begins with inner transformation, he helps people develop the clarity, alignment, and strength of character required to inspire and transform their environment.',
-        'Through his talks, programs, and writings, he embodies a demanding yet universal vision of leadership: a journey of personal growth that becomes a collective impact.',
+        'Founder of The Leaders’ Factory, trainer, speaker, and committed author, D. Zonzerigué Soro supports those who want to combine **inner rigor**, **lasting impact**, and **deep alignment** in their personal, community, and professional life. He chose to leave the beaten path to answer an essential question:',
+        '*What kind of leader am I becoming? And am I still faithful to what drives me?*',
+        'This book is the result of a personal journey, but above all of a conviction:',
+        '**Transformational leadership begins within — or it does not transform anything.**',
+        'Through this book, he shares a grounded, human, and structured vision of leadership. Not a recipe. A path.',
+        '*One for those who dare to forge themselves from within to better illuminate the world around them.*',
       ],
     },
     about: {
@@ -164,4 +168,3 @@ export const content = {
     },
   },
 }
-
