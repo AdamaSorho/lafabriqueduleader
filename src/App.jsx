@@ -199,7 +199,7 @@ function AboutAuthor({ strings }) {
           <img
             src={author}
             alt="Coach Zed"
-            className="h-[520px] w-full object-cover sm:h-[620px]"
+            className="h-[620px] w-full object-cover object-bottom sm:h-[760px] lg:h-[880px] xl:h-[980px]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
           <div className="absolute bottom-0 left-0 p-6 sm:p-10">
