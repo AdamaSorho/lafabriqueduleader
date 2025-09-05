@@ -81,6 +81,13 @@ export const content = {
     footer: {
       contact: 'Contact',
       follow: 'Suivez-moi',
+      email: 'contact@lafabriqueduleader.com',
+      socials: [
+        // { kind: 'linkedin', label: 'LinkedIn', url: '' },
+        // { kind: 'x', label: 'X', url: '' },
+        // { kind: 'instagram', label: 'Instagram', url: '' },
+        // { kind: 'youtube', label: 'YouTube', url: '' },
+      ],
     },
   },
   en: {
@@ -165,6 +172,13 @@ export const content = {
     footer: {
       contact: 'Contact',
       follow: 'Follow me',
+      email: 'contact@lafabriqueduleader.com',
+      socials: [
+        // { kind: 'linkedin', label: 'LinkedIn', url: '' },
+        // { kind: 'x', label: 'X', url: '' },
+        // { kind: 'instagram', label: 'Instagram', url: '' },
+        // { kind: 'youtube', label: 'YouTube', url: '' },
+      ],
     },
   },
 }

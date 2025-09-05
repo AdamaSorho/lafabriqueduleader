@@ -318,7 +318,32 @@ function CTA({ strings, onOpenExcerpt }) {
   );
 }
 
-function Footer() {
+function Footer({ strings }) {
+  const email = strings.footer?.email
+  const socials = strings.footer?.socials || []
+  const Icon = ({ kind }) => {
+    const cls = "size-4"
+    switch (kind) {
+      case "linkedin":
+        return (
+          <svg className={cls} viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 8h5v16H0zM9 8h4.8v2.2h.07c.67-1.2 2.3-2.47 4.73-2.47C22.4 7.73 24 10 24 13.6V24h-5v-8.6c0-2.05-.04-4.69-2.86-4.69-2.86 0-3.3 2.23-3.3 4.54V24H9z"/></svg>
+        )
+      case "x":
+        return (
+          <svg className={cls} viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M18.244 2H21l-6.79 7.74L22 22h-5.82l-4.55-5.9L6.2 22H3.44l7.25-8.27L2 2h5.94l4.1 5.47L18.24 2zM8.24 4H6.08l9.78 13.11h2.23L8.24 4z"/></svg>
+        )
+      case "instagram":
+        return (
+          <svg className={cls} viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm0 2a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H7zm5 3a5 5 0 110 10 5 5 0 010-10zm0 2.2a2.8 2.8 0 100 5.6 2.8 2.8 0 000-5.6zM18.5 5.5a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z"/></svg>
+        )
+      case "youtube":
+        return (
+          <svg className={cls} viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.7 3.5 12 3.5 12 3.5s-7.7 0-9.4.6A3 3 0 00.5 6.2C0 7.9 0 12 0 12s0 4.1.5 5.8a3 3 0 002.1 2.1c1.7.6 9.4.6 9.4.6s7.7 0 9.4-.6a3 3 0 002.1-2.1c.5-1.7.5-5.8.5-5.8s0-4.1-.5-5.8zM9.6 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+        )
+      default:
+        return null
+    }
+  }
   return (
     <footer id="contact" className="border-t border-black/10 bg-white py-10">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 sm:flex-row sm:px-6 lg:px-8">
@@ -392,7 +417,7 @@ export default function App() {
           <Contact lang={lang} />
         </Section>
       </main>
-      <Footer />
+      <Footer strings={strings} />
       <ExcerptModal open={excerptOpen} onClose={() => setExcerptOpen(false)} lang={lang} />
     </div>
   );
