@@ -7,6 +7,7 @@
 
 :root {
   --accent: #ffd700; /* gold accent similar to template */
+  --star: #f6d365; /* warm golden star color */
 }
 
 html, body, #root { height: 100%; }
