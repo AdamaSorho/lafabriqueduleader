@@ -1,0 +1,19 @@
+project            = "lafabrique-leader"
+region             = "us-east-1"
+
+# Replace with your unique bucket name
+site_bucket_name   = "lafabrique-leader-site-1234"
+
+# If you have a custom domain + ACM cert in us-east-1, you can extend viewer_certificate.
+#acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Used in emails sent by the API (and for absolute links)
+site_url           = "https://your-domain-or-cloudfront.net"
+from_email         = "La Fabrique <no-reply@yourdomain.com>"
+cors_origin        = "https://your-domain-or-cloudfront.net"
+
+# Optional
+mailchimp_api_key       = ""
+mailchimp_server_prefix = ""
+mailchimp_list_id       = ""
+#ddb_table              = "newsletter_signups"

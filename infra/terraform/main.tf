@@ -25,6 +25,14 @@ resource "aws_s3_bucket" "site" {
   force_destroy = true
 }
 
+resource "aws_s3_bucket_public_access_block" "site" {
+  bucket                  = aws_s3_bucket.site.id
+  block_public_acls       = true
+  block_public_policy     = false # bucket policy used for OAC access
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_s3_bucket_ownership_controls" "site" {
   bucket = aws_s3_bucket.site.id
   rule { object_ownership = "BucketOwnerEnforced" }
@@ -57,6 +65,7 @@ data "aws_iam_policy_document" "site_bucket_policy" {
 resource "aws_s3_bucket_policy" "site" {
   bucket = aws_s3_bucket.site.id
   policy = data.aws_iam_policy_document.site_bucket_policy.json
+  depends_on = [aws_cloudfront_distribution.cdn]
 }
 
 resource "aws_cloudfront_distribution" "cdn" {
@@ -71,25 +80,22 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "s3-site"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = "s3-site"
     viewer_protocol_policy = "redirect-to-https"
 
-    forwarded_values {
-      query_string = false
-      cookies { forward = "none" }
-    }
+    # Use AWS managed cache policy (CachingOptimized) to avoid forwarded_values conflicts
+    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   }
 
   price_class = "PriceClass_100"
 
   restrictions { geo_restriction { restriction_type = "none" } }
 
+  # Default certificate by default. Set ACM in us-east-1 separately if needed.
   viewer_certificate {
-    cloudfront_default_certificate = var.acm_certificate_arn == "" ? true : false
-    acm_certificate_arn            = var.acm_certificate_arn == "" ? null : var.acm_certificate_arn
-    ssl_support_method             = var.acm_certificate_arn == "" ? null : "sni-only"
+    cloudfront_default_certificate = true
   }
 
   custom_error_response {
@@ -213,4 +219,3 @@ resource "aws_lambda_permission" "apigw" {
 output "api_base_url" { value = aws_apigatewayv2_api.http.api_endpoint }
 output "site_bucket" { value = aws_s3_bucket.site.bucket }
 output "cloudfront_domain" { value = aws_cloudfront_distribution.cdn.domain_name }
-
