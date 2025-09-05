@@ -351,9 +351,22 @@ function Footer({ strings }) {
           <div className="size-6 rounded bg-black" aria-hidden />
           <span className="text-sm font-semibold">La Fabrique du Leader</span>
         </div>
-        <div className="text-xs text-gray-500">
-          © {new Date().getFullYear()} — Tous droits réservés
+        <div className="flex flex-col items-center gap-3 sm:flex-row">
+          {email && (
+            <a href={`mailto:${email}`} className="text-xs text-gray-700 hover:text-black">{email}</a>
+          )}
+          {socials.length > 0 && (
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-gray-500">{strings.footer.follow}</span>
+              {socials.filter(s => s.url).map((s) => (
+                <a key={s.kind} href={s.url} aria-label={s.label} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-full border border-black/10 p-2 text-gray-700 hover:bg-gray-50 hover:text-black">
+                  <Icon kind={s.kind} />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
+        <div className="text-xs text-gray-500">© {new Date().getFullYear()} — Tous droits réservés</div>
       </div>
     </footer>
   );
