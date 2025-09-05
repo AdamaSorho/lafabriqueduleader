@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Subscribe-and-send API with SES (and optional Mailchimp/DynamoDB)
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 10
+
+Parameters:
+  SiteUrl:
+    Type: String
+  FromEmail:
+    Type: String
+  MailchimpApiKey:
+    Type: String
+    Default: ''
+  MailchimpServerPrefix:
+    Type: String
+    Default: ''
+  MailchimpListId:
+    Type: String
+    Default: ''
+  DdbTable:
+    Type: String
+    Default: ''
+  CorsOrigin:
+    Type: String
+    Default: '*'
+
+Resources:
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref CorsOrigin
+        AllowMethods:
+          - POST
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+
+  SubscribeAndSend:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../../aws/lambda/subscribe-and-send
+      Handler: index.cjs.handler
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - dynamodb:PutItem
+              Resource:
+                - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DdbTable}
+      Environment:
+        Variables:
+          SITE_URL: !Ref SiteUrl
+          FROM_EMAIL: !Ref FromEmail
+          MAILCHIMP_API_KEY: !Ref MailchimpApiKey
+          MAILCHIMP_SERVER_PREFIX: !Ref MailchimpServerPrefix
+          MAILCHIMP_LIST_ID: !Ref MailchimpListId
+          DDB_TABLE: !Ref DdbTable
+          CORS_ORIGIN: !Ref CorsOrigin
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /subscribe-and-send
+            Method: POST
+
+Outputs:
+  ApiBaseUrl:
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com
+

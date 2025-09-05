@@ -1,0 +1,48 @@
+service: lafabrique-leader
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${env:AWS_REGION, 'us-east-1'}
+  stage: ${env:STAGE, 'prod'}
+  httpApi:
+    cors:
+      allowedOrigins:
+        - ${env:CORS_ORIGIN, '*'}
+      allowedMethods:
+        - POST
+        - OPTIONS
+      allowedHeaders:
+        - Content-Type
+  environment:
+    SITE_URL: ${env:SITE_URL}
+    FROM_EMAIL: ${env:FROM_EMAIL}
+    MAILCHIMP_API_KEY: ${env:MAILCHIMP_API_KEY, ''}
+    MAILCHIMP_SERVER_PREFIX: ${env:MAILCHIMP_SERVER_PREFIX, ''}
+    MAILCHIMP_LIST_ID: ${env:MAILCHIMP_LIST_ID, ''}
+    DDB_TABLE: ${env:DDB_TABLE, ''}
+    CORS_ORIGIN: ${env:CORS_ORIGIN, '*'}
+
+functions:
+  subscribeAndSend:
+    handler: aws/lambda/subscribe-and-send/index.cjs.handler
+    events:
+      - httpApi:
+          method: POST
+          path: /subscribe-and-send
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - ses:SendEmail
+          - ses:SendRawEmail
+        Resource: '*'
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - arn:aws:dynamodb:*:*:table/${env:DDB_TABLE, ''}
+
+package:
+  patterns:
+    - aws/lambda/subscribe-and-send/**
+
