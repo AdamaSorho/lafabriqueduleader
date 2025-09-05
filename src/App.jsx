@@ -191,31 +191,36 @@ function Why({ strings }) {
   );
 }
 
-function AboutAuthor({ strings }) {
+function AuthorSection({ strings }) {
+  const paras = strings.author.body || []
   return (
     <section id="author" className="relative isolate py-10 sm:py-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-3xl border border-black/10">
-          <img
-            src={author}
-            alt="Coach Zed"
-            className="h-[620px] w-full object-cover object-bottom sm:h-[760px] lg:h-[880px] xl:h-[980px]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-          <div className="absolute bottom-0 left-0 p-6 sm:p-10">
-            <p className="text-xs uppercase tracking-widest text-white/80">{strings.hero.brand}</p>
-            <h2 className="mt-2 font-serif text-3xl italic text-white sm:text-4xl">{strings.author.title}</h2>
-            <div className="mt-4 max-w-2xl space-y-2 text-sm text-white/90">
-              {(strings.author.body || []).slice(0,2).map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
+        <div className="overflow-hidden rounded-3xl border border-black/10 bg-neutral-950 text-white">
+          <div className="grid md:grid-cols-2">
+            <div className="relative bg-black">
+              <img
+                src={author}
+                alt="Coach Zed"
+                className="h-[680px] w-full object-contain md:h-[760px] lg:h-[860px]"
+              />
+            </div>
+            <div className="p-8 md:p-12">
+              <h2 className="font-serif text-3xl italic tracking-tight text-white sm:text-4xl">
+                {strings.author.title}
+              </h2>
+              <div className="mt-5 space-y-4 text-base leading-7 text-white/90">
+                {paras.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
       <div className="pointer-events-none absolute inset-x-0 -z-10 h-[200px] bg-[radial-gradient(40%_60%_at_50%_100%,rgba(0,0,0,0.06),transparent_70%)]" />
     </section>
-  );
+  )
 }
 
 function Testimonials({ strings }) {
@@ -304,7 +309,7 @@ export default function App() {
         >
           <Why strings={strings} />
         </Section>
-        <AboutAuthor strings={strings} />
+        <AuthorSection strings={strings} />
         <Section id="about" eyebrow={strings.hero.brand} title={strings.about.title}>
           <div className="space-y-3 text-sm text-gray-700">
             {strings.about.body.map((p, i) => (
