@@ -9,7 +9,15 @@ function useLang() {
     const url = new URL(window.location.href);
     const param = url.searchParams.get("lang");
     const cached = localStorage.getItem("lang");
-    return param || cached || "fr";
+    if (param) return param;
+    if (cached) return cached;
+    const prefs = (navigator.languages && navigator.languages.length
+      ? navigator.languages
+      : [navigator.language || ""]).map((l) => String(l).toLowerCase());
+    const first = prefs.find(Boolean) || "";
+    if (first.startsWith("en")) return "en";
+    if (first.startsWith("fr")) return "fr";
+    return "fr"; // default
   });
   useEffect(() => {
     localStorage.setItem("lang", lang);
