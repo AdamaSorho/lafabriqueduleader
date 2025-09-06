@@ -17,6 +17,7 @@
     "react-dom": "^19.1.1"
   },
   "devDependencies": {
+    "esbuild": "^0.25.9",
     "@eslint/js": "^9.33.0",
     "@tailwindcss/vite": "^4.1.13",
     "@types/react": "^19.1.10",
