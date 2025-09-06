@@ -33,10 +33,10 @@ export const handler = async (event) => {
       const sig = crypto.createHmac('sha256', secret).update(email).digest('hex')
       const verifyPage = `${siteUrl}/download.html?e=${encodeURIComponent(email)}&sig=${sig}`
 
-      const subject = lang === 'fr' ? 'Votre extrait — La Fabrique du Leader' : "Your excerpt — The Leader’s Factory"
+      const subject = lang === 'fr' ? 'Votre extrait — La Fabrique du Leader' : "Your excerpt — The Leader’s Inner Forge"
       const html = lang === 'fr'
         ? `<p>Bonjour,</p><p>Merci pour votre intérêt. Cliquez ici pour télécharger l’extrait : <a href="${verifyPage}">${verifyPage}</a></p><p>— La Fabrique du Leader</p>`
-        : `<p>Hello,</p><p>Thanks for your interest. Click here to download the excerpt: <a href="${verifyPage}">${verifyPage}</a></p><p>— The Leader’s Factory</p>`
+        : `<p>Hello,</p><p>Thanks for your interest. Click here to download the excerpt: <a href="${verifyPage}">${verifyPage}</a></p><p>— The Leader’s Inner Forge</p>`
 
       // Send via SES
       const fromEmail = process.env.FROM_EMAIL

@@ -95,7 +95,7 @@ export const content = {
   en: {
     nav: { preorder: 'Pre-order', excerpt: 'Download excerpt' },
     hero: {
-      brand: "The Leader’s Factory",
+      brand: "The Leader’s Inner Forge",
       title: 'Forge a lucid, grounded, and deeply human leadership.',
       sub: 'A transformational guide to becoming a strong, aligned, and visionary leader.',
       ctas: { preorder: 'Pre-order now', excerpt: 'Download a free excerpt' },
@@ -103,7 +103,7 @@ export const content = {
     why: {
       title: 'Why this book?',
       lead: 'What if now was the time for your leadership to take a **new direction**?',
-      body: 'The Leader’s Factory is not just another management manual. It is an **inner workshop**: a path to **align** your **mindset**, **skills**, and **character**.',
+      body: 'The Leader’s Inner Forge is not just another management manual. It is an **inner workshop**: a path to **align** your **mindset**, **skills**, and **character**.',
       bullets: [
         '🔍 **Clarity** – Develop deeper self-awareness.',
         '⚖️ **Alignment** – Turn your values into coherent decisions.',
@@ -125,7 +125,7 @@ export const content = {
     about: {
       title: 'About the book',
       body: [
-        'The Leader’s Factory is an invitation to inner transformation. This book is a guide to becoming a lucid, aligned leader capable of creating lasting impact.',
+        'The Leader’s Inner Forge is an invitation to inner transformation. This book is a guide to becoming a lucid, aligned leader capable of creating lasting impact.',
         'It is built around three fundamental pillars:',
       ],
       pillars: [
@@ -168,7 +168,7 @@ export const content = {
     },
     finalCta: {
       title: 'The world needs strong leaders. What if you were one of them?',
-      sub: 'Pre-order The Leader’s Factory and begin forging your own inner path to transformation.',
+      sub: 'Pre-order The Leader’s Inner Forge and begin forging your own inner path to transformation.',
       ctas: { preorder: 'Pre-order now', excerpt: 'Download a free excerpt' },
     },
     footer: {
