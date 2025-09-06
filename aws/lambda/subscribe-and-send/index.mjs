@@ -56,6 +56,7 @@ export const handler = async (event) => {
             lang: { S: lang },
             ts: { N: String(Date.now()) },
             status: { S: 'pending' },
+            source: { S: 'excerpt' },
           },
         }))
       }
@@ -95,11 +96,12 @@ export const handler = async (event) => {
         await ddb.send(new UpdateItemCommand({
           TableName: process.env.DDB_TABLE,
           Key: { email: { S: email } },
-          UpdateExpression: 'SET #s = :v, verifiedAt = :t',
+          UpdateExpression: 'SET #s = :v, verifiedAt = :t, source = if_not_exists(source, :src)',
           ExpressionAttributeNames: { '#s': 'status' },
           ExpressionAttributeValues: {
             ':v': { S: 'verified' },
             ':t': { N: String(Date.now()) },
+            ':src': { S: 'excerpt' },
           },
         }))
       }

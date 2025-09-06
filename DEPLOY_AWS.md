@@ -24,7 +24,7 @@ Terraform workflow (recommended)
      - `site_bucket` and `cloudfront_domain` → used by `scripts/deploy-frontend.sh`.
 
 DynamoDB option
-- If `ddb_table` is set, Terraform will create the table and grant the Lambda permission to `dynamodb:PutItem` on it. The Lambda is already coded to write `{ email, lang, ts }` when the `DDB_TABLE` env var is present.
+- If `ddb_table` is set, Terraform will create the table and grant the Lambda permission to `dynamodb:PutItem` on it. The Lambda writes items like `{ email, lang, ts, status, verifiedAt?, source }` when the `DDB_TABLE` env var is present, where `source` is `excerpt` for the excerpt-download flow.
 
 Frontend API base
 - After `terraform apply`, set the frontend to call your API:
