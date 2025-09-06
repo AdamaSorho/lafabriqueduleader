@@ -16,6 +16,8 @@ provider "aws" {
   region = var.region
 }
 
+data "aws_caller_identity" "current" {}
+
 ############################
 # Static hosting (S3 + CF)
 ############################
@@ -136,11 +138,23 @@ resource "aws_cloudfront_distribution" "cdn" {
 # Lambda + HTTP API
 ############################
 
+resource "null_resource" "build_lambda" {
+  count = var.enable_api ? 1 : 0
+  # Rebuild when the source changes
+  triggers = {
+    src_hash = filesha256("../../aws/lambda/subscribe-and-send/index.mjs")
+  }
+  provisioner "local-exec" {
+    command = "cd ../../ && npm run -s build:lambda"
+  }
+}
+
 data "archive_file" "lambda_zip" {
   count       = var.enable_api ? 1 : 0
   type        = "zip"
-  source_dir  = "../../aws/lambda/subscribe-and-send"
+  source_file = "../../aws/lambda/subscribe-and-send/dist/index.mjs"
   output_path = "./.terraform/${var.project}-lambda.zip"
+  depends_on  = [null_resource.build_lambda]
 }
 
 resource "aws_iam_role" "lambda_exec" {
@@ -181,6 +195,41 @@ resource "aws_iam_role_policy_attachment" "ses_attach" {
   policy_arn = aws_iam_policy.ses_send[0].arn
 }
 
+############################
+# DynamoDB (optional)
+############################
+
+resource "aws_dynamodb_table" "signups" {
+  count         = var.ddb_table != "" ? 1 : 0
+  name          = var.ddb_table
+  billing_mode  = "PAY_PER_REQUEST"
+  hash_key      = "email"
+
+  attribute {
+    name = "email"
+    type = "S"
+  }
+}
+
+resource "aws_iam_policy" "ddb_put" {
+  count  = var.enable_api && var.ddb_table != "" ? 1 : 0
+  name   = "${var.project}-ddb-put"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Action = ["dynamodb:PutItem"],
+      Resource = "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.ddb_table}"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ddb_attach" {
+  count      = var.enable_api && var.ddb_table != "" ? 1 : 0
+  role       = aws_iam_role.lambda_exec[0].name
+  policy_arn = aws_iam_policy.ddb_put[0].arn
+}
+
 resource "aws_lambda_function" "api" {
   count         = var.enable_api ? 1 : 0
   function_name = "${var.project}-subscribe-and-send"
@@ -200,54 +249,24 @@ resource "aws_lambda_function" "api" {
       MAILCHIMP_LIST_ID         = var.mailchimp_list_id
       DDB_TABLE                 = var.ddb_table
       CORS_ORIGIN               = var.cors_origin
+      LINK_SIGNING_SECRET       = var.link_signing_secret
     }
   }
 }
 
-resource "aws_apigatewayv2_api" "http" {
-  count         = var.enable_api ? 1 : 0
-  name          = "${var.project}-http-api"
-  protocol_type = "HTTP"
-  cors_configuration {
+resource "aws_lambda_function_url" "api" {
+  count               = var.enable_api ? 1 : 0
+  function_name       = aws_lambda_function.api[0].function_name
+  authorization_type  = "NONE"
+  cors {
     allow_origins = [var.cors_origin]
-    allow_methods = ["POST", "OPTIONS"]
-    allow_headers = ["Content-Type"]
+    allow_methods = ["GET", "POST", "OPTIONS"]
+    allow_headers = ["content-type"]
   }
 }
 
-resource "aws_apigatewayv2_integration" "lambda" {
-  count                  = var.enable_api ? 1 : 0
-  api_id                 = aws_apigatewayv2_api.http[0].id
-  integration_type       = "AWS_PROXY"
-  integration_uri        = aws_lambda_function.api[0].invoke_arn
-  payload_format_version = "2.0"
-}
-
-resource "aws_apigatewayv2_route" "post_subscribe" {
-  count     = var.enable_api ? 1 : 0
-  api_id    = aws_apigatewayv2_api.http[0].id
-  route_key = "POST /subscribe-and-send"
-  target    = "integrations/${aws_apigatewayv2_integration.lambda[0].id}"
-}
-
-resource "aws_apigatewayv2_stage" "default" {
-  count       = var.enable_api ? 1 : 0
-  api_id      = aws_apigatewayv2_api.http[0].id
-  name        = "$default"
-  auto_deploy = true
-}
-
-resource "aws_lambda_permission" "apigw" {
-  count        = var.enable_api ? 1 : 0
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.api[0].arn
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.http[0].execution_arn}/*/*/subscribe-and-send"
-}
-
 output "api_base_url" {
-  value = length(aws_apigatewayv2_api.http) > 0 ? aws_apigatewayv2_api.http[0].api_endpoint : ""
+  value = length(aws_lambda_function_url.api) > 0 ? aws_lambda_function_url.api[0].function_url : ""
 }
 output "site_bucket" { value = aws_s3_bucket.site.bucket }
 output "cloudfront_domain" { value = aws_cloudfront_distribution.cdn.domain_name }

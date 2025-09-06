@@ -482,9 +482,9 @@ export default function App() {
   useEffect(() => {
     try {
       const existing = document.querySelector('link[rel="icon"]');
-      const link = existing || document.createElement('link');
-      link.rel = 'icon';
-      link.type = 'image/png';
+      const link = existing || document.createElement("link");
+      link.rel = "icon";
+      link.type = "image/png";
       link.href = logo;
       if (!existing) document.head.appendChild(link);
     } catch (_) {
@@ -683,9 +683,17 @@ function ExcerptModal({ open, onClose, lang }) {
         import.meta.env && import.meta.env.VITE_API_BASE
           ? String(import.meta.env.VITE_API_BASE)
           : "";
-      const url = base
-        ? `${base.replace(/\/$/, "")}/subscribe-and-send`
-        : "/api/subscribe-and-send";
+      if (!base) {
+        setStatus("error");
+        setMessage(
+          t(
+            "Configuration manquante: VITE_API_BASE n’est pas défini.",
+            "Missing configuration: VITE_API_BASE is not set."
+          )
+        );
+        return;
+      }
+      const url = `${base.replace(/\/$/, "")}/subscribe-and-send`;
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

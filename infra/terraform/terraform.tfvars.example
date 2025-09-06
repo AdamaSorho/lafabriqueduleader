@@ -1,25 +1,41 @@
-project            = "lafabrique-leader"
-region             = "us-east-1"
+# Project/region
+project = "lafabrique-leader"
+region  = "us-east-1"
 
-# Replace with your unique bucket name
-site_bucket_name   = "lafabrique-leader-site-1234"
+# REQUIRED: unique S3 bucket name for the static site (must be globally unique)
+# Example: "lafabriqueduleader-site-12345"
+site_bucket_name = "<your-unique-s3-bucket-name>"
 
-# If you have a custom domain + ACM cert in us-east-1, you can extend viewer_certificate.
-# For using lafabriqueduleader.com now, create/validate an ACM cert in us-east-1 and set both:
-aliases            = ["lafabriqueduleader.com", "www.lafabriqueduleader.com"]
-#acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+# Public site URL used inside emails and for CORS
+# If you do NOT have a custom domain yet, you can temporarily set this later
+# to the CloudFront domain output (e.g., https://dxxxxx.cloudfront.net).
+site_url    = "https://lafabriqueduleader.com"
+cors_origin = "https://lafabriqueduleader.com"
 
-# Used in emails sent by the API (and for absolute links)
-site_url           = "https://your-domain-or-cloudfront.net"
-from_email         = "La Fabrique <no-reply@yourdomain.com>"
-cors_origin        = "https://your-domain-or-cloudfront.net"
+# FROM address used by SES in Lambda (must be part of a verified SES identity)
+from_email = "La Fabrique <no-reply@lafabriqueduleader.com>"
 
-# Optional
+# Enable the API (API Gateway + Lambda). Required for the excerpt email flow.
+enable_api = true
+
+# Secret used to sign verification links (use a long random string)
+link_signing_secret = "<generate-a-long-random-string>"
+
+# Optional: Mailchimp values (leave empty to skip)
 mailchimp_api_key       = ""
 mailchimp_server_prefix = ""
 mailchimp_list_id       = ""
-#ddb_table              = "newsletter_signups"
 
-# API stack toggle (Lambda + API Gateway)
-# Leave false for now (frontend-only deploy). Set true later when ready.
-enable_api         = false
+# Optional: DynamoDB table name to store signups
+# If set, Terraform will create the table with partition key `email` (S)
+# and grant Lambda permission to PutItem. Leave empty to skip creating/using DynamoDB.
+ddb_table = "newsletter_signups"
+
+# Optional: CloudFront custom domain. If you want to serve via your domain,
+# set aliases and ACM certificate ARN (in us-east-1) for those names.
+# If not using a custom domain yet, leave aliases empty and acm_certificate_arn "".
+aliases            = [
+  # "lafabriqueduleader.com",
+  # "www.lafabriqueduleader.com",
+]
+acm_certificate_arn = ""

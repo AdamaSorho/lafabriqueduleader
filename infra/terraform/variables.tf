@@ -38,6 +38,12 @@ variable "cors_origin" {
   description = "Allowed CORS origin for API (e.g., https://domain)" 
 }
 
+variable "link_signing_secret" {
+  type        = string
+  default     = ""
+  description = "Secret used to sign excerpt verification links (HMAC). Set to a long random string."
+}
+
 variable "mailchimp_api_key" { 
   type = string
   default = "" 

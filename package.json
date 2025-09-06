@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:lambda": "esbuild aws/lambda/subscribe-and-send/index.mjs --bundle --platform=node --target=node20 --format=esm --outfile=aws/lambda/subscribe-and-send/dist/index.mjs",
+    "check:lambda": "npm run -s build:lambda && node aws/lambda/subscribe-and-send/check.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy:frontend": "bash scripts/deploy-frontend.sh"
