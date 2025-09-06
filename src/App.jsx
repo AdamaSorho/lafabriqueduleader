@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { content } from "./content";
 import img1 from "./assets/image1.avif";
 import author from "./assets/Soro.jpg";
+import logo from "./assets/logo.png";
 
 function useLang() {
   const [lang, setLang] = useState(() => {
@@ -45,7 +46,7 @@ function Nav({ lang, setLang, strings }) {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
-          <div className="size-7 rounded bg-black" aria-hidden />
+          <img src={logo} alt={strings.hero.brand} className="h-7 w-auto" />
           <span className="font-semibold tracking-tight">
             {strings.hero.brand}
           </span>
@@ -432,7 +433,7 @@ function Footer({ strings }) {
     <footer id="contact" className="border-t border-black/10 bg-white py-10">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 sm:flex-row sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
-          <div className="size-6 rounded bg-black" aria-hidden />
+          <img src={logo} alt="La Fabrique du Leader" className="h-6 w-auto" />
           <span className="text-sm font-semibold">La Fabrique du Leader</span>
         </div>
         <div className="flex flex-col items-center gap-3 sm:flex-row">
@@ -477,6 +478,19 @@ function Footer({ strings }) {
 export default function App() {
   const { lang, setLang, strings } = useLang();
   const [excerptOpen, setExcerptOpen] = useState(false);
+  // Ensure favicon uses our logo
+  useEffect(() => {
+    try {
+      const existing = document.querySelector('link[rel="icon"]');
+      const link = existing || document.createElement('link');
+      link.rel = 'icon';
+      link.type = 'image/png';
+      link.href = logo;
+      if (!existing) document.head.appendChild(link);
+    } catch (_) {
+      // no-op
+    }
+  }, []);
   return (
     <div className="min-h-full bg-white text-gray-900 font-sans">
       <Nav lang={lang} setLang={setLang} strings={strings} />

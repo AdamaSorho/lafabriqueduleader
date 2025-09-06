@@ -35,7 +35,9 @@ resource "aws_s3_bucket_public_access_block" "site" {
 
 resource "aws_s3_bucket_ownership_controls" "site" {
   bucket = aws_s3_bucket.site.id
-  rule { object_ownership = "BucketOwnerEnforced" }
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
 }
 
 resource "aws_cloudfront_origin_access_control" "oac" {
@@ -72,7 +74,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   enabled             = true
   comment             = var.project
   default_root_object = "index.html"
-  aliases             = var.aliases
+  aliases             = var.acm_certificate_arn != "" ? var.aliases : []
 
   origin {
     domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
@@ -92,14 +94,27 @@ resource "aws_cloudfront_distribution" "cdn" {
 
   price_class = "PriceClass_100"
 
-  restrictions { geo_restriction { restriction_type = "none" } }
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
 
-  # Default cert unless ACM provided (must be in us-east-1)
-  viewer_certificate {
-    cloudfront_default_certificate = var.acm_certificate_arn == "" ? true : false
-    acm_certificate_arn            = var.acm_certificate_arn == "" ? null : var.acm_certificate_arn
-    ssl_support_method             = var.acm_certificate_arn == "" ? null : "sni-only"
-    minimum_protocol_version       = var.acm_certificate_arn == "" ? null : "TLSv1.2_2021"
+  # viewer_certificate must exist exactly once. Use dynamic blocks to switch between default cert and ACM.
+  dynamic "viewer_certificate" {
+    for_each = var.acm_certificate_arn == "" ? [1] : []
+    content {
+      cloudfront_default_certificate = true
+    }
+  }
+
+  dynamic "viewer_certificate" {
+    for_each = var.acm_certificate_arn != "" ? [1] : []
+    content {
+      acm_certificate_arn      = var.acm_certificate_arn
+      ssl_support_method       = "sni-only"
+      minimum_protocol_version = "TLSv1.2_2021"
+    }
   }
 
   custom_error_response {
