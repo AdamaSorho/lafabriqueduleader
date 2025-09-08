@@ -53,12 +53,65 @@ export const content = {
         'Forger un caractère aligné avec vos valeurs profondes.',
       ],
     },
+    preface: {
+      title: 'Préface',
+      quote:
+        "[Ajoutez ici le témoignage de l’auteur de la préface.]",
+      author: {
+        name: "[Nom de l’auteur de la préface]",
+        role: '',
+        photo: '', // Placez une image dans `public/` et indiquez le chemin, ex: '/preface.jpg'
+      },
+    },
     testimonials: {
       title: 'Témoignages',
+      intro:
+        "Ces témoignages reflètent la diversité des voix qui ont lu ce livre avant sa publication officielle : dirigeants, professeurs, cadres, coachs, entrepreneurs, employés. Chacun parle depuis son expérience propre, avec son regard et sa sensibilité. Ensemble, ils rappellent que le leadership dépasse les titres et s’ancre avant tout dans l’intériorité.",
       quotes: [
-        { name: 'Claire, consultante en stratégie', text: 'En lisant ces pages, j’ai découvert que le vrai leadership ne se mesure pas par le pouvoir, mais par la lucidité et l’alignement intérieur.' },
-        { name: 'Amadou, entrepreneur social', text: 'Ce livre m’a aidé à faire le tri entre ce que j’avais appris et ce que je voulais vraiment incarner comme leader. C’est un guide qui invite à l’authenticité.' },
-        { name: 'Sophie, cadre RH', text: 'Chaque chapitre m’a donné une clé concrète pour mieux me connaître et agir avec plus de cohérence. Une lecture qui transforme de l’intérieur.' },
+        {
+          name: 'Jean-Marc Mercy — Mercy Consulting Group, Coach exécutif',
+          text:
+            'La Fabrique du Leader est un miroir puissant qui révèle notre véritable identité et nous guide vers un leadership authentique, aligné et porteur de sens.',
+        },
+        {
+          name: 'Karim Coulibaly — DGA, PETROCI (Abidjan)',
+          text:
+            'D. Zonzerigué éclaire un angle mort du leadership contemporain : la dimension intérieure. Ce livre rappelle avec force que le vrai pouvoir de transformation commence d’abord en soi. Une réflexion incontournable pour tout dirigeant.',
+        },
+        {
+          name: 'Pr. Bakayoko Ismaila — Université de Cocody (Abidjan)',
+          text:
+            'Ce livre est d’une clarté exigeante et offre un véritable enseignement sur le leadership. Chaque chapitre propose des leviers concrets pour le changement d’attitude… En le lisant, j’ai eu le sentiment qu’il s’adressait directement à moi. Chapeau !',
+        },
+        {
+          name: 'Siaka Soro — Employé',
+          text:
+            'Lire La Fabrique du Leader a été pour moi une révélation. On y découvre que le leadership n’est pas réservé aux cadres supérieurs ou aux dirigeants, mais qu’il commence dans la manière dont chacun se connaît et agit au quotidien. Ce livre m’a permis de valoriser mes forces, de comprendre mes limites et de voir que même à mon niveau, je peux inspirer, influencer et contribuer positivement autour de moi.',
+        },
+        {
+          name: 'Plexie Koné-Mayne — Responsable Task Force Recrutement, Caisse des Dépôts et Consignations (Paris)',
+          text:
+            'La Fabrique du Leader vient percuter en nous une réalité souvent inconsciente : être leader ne s’improvise pas, ne se décrète pas. Cela se construit, pas à pas, en capitalisant sur nos expériences, nos forces, nos fragilités. Le vrai leadership commence toujours par la rencontre avec soi-même. Ce livre clair et inspirant montre un leadership profondément humain, qui trouve sa place au travail, dans la vie personnelle et dans la société.',
+        },
+        {
+          name: 'Dr Kouadio Antoine — Université de Cocody (Abidjan)',
+          text:
+            'Ce n’est pas d’un énième livre sur le leadership technique, mais d’une exploration intérieure — rigoureusement maintenue tout au long des trois parties (Mindset, Compétences, Caractère). Ce livre est particulièrement touchant par son approche tournée vers l’intériorité et l’authenticité du leader. L’idée que le leadership n’est pas un rôle à jouer mais une façon d’exister est une perspective rafraîchissante et profonde.',
+        },
+        {
+          name: 'Awa Diomandé — Abidjan',
+          text:
+            'La Fabrique du Leader déshabille. Elle met le lecteur face à des aspects de lui-même qu’il préfère souvent ignorer. C’est une lecture qui dérange, mais qui libère.',
+        },
+        {
+          name: 'Nader Nahle — Abidjan',
+          text:
+            'Chaque passage m’interpelle fortement : la profondeur et l’authenticité du propos changent vraiment de ce qu’on lit habituellement sur le leadership. C’est un livre qui ne donne pas seulement des clés, mais qui pousse à une véritable introspection.',
+        },
+      ],
+      outro: [
+        "Autant de voix qui confirment une même évidence : ce livre est une invitation intérieure vers le leadership authentique.",
+        "Et vous, êtes-vous prêt à entrer dans La Fabrique du Leader ?",
       ],
     },
     faq: {
@@ -146,12 +199,60 @@ export const content = {
         'Forge a character fully aligned with your deepest values.',
       ],
     },
+    preface: {
+      title: 'Preface',
+      quote: '[Add the preface author’s testimonial here.]',
+      author: { name: "[Preface author’s name]", role: '', photo: '' },
+    },
     testimonials: {
       title: 'Testimonials',
+      intro:
+        'These testimonials reflect the diversity of voices who read this book before its official release: executives, professors, managers, coaches, entrepreneurs, and employees. Each speaks from their own experience, with their perspective and sensitivity. Together, they remind us that leadership goes beyond titles and is rooted first and foremost in inner life.',
       quotes: [
-        { name: 'David, corporate manager', text: 'This book showed me that leadership is not about control, but about clarity and alignment. It gave me a framework to lead with authenticity.' },
-        { name: 'Anitah, non-profit director', text: 'A rare blend of deep reflection and practical guidance. Each section challenged me to step into a more conscious version of myself.' },
-        { name: 'James, young entrepreneur', text: 'Reading it felt like a conversation with a mentor — honest, demanding, yet deeply empowering.' },
+        {
+          name: 'Jean-Marc Mercy — Mercy Consulting Group, Executive Coach',
+          text:
+            "The Leader’s Forge is a powerful mirror that reveals our true identity and guides us toward an authentic, aligned, and meaningful leadership.",
+        },
+        {
+          name: 'Karim Coulibaly — Deputy CEO, PETROCI (Abidjan)',
+          text:
+            'D. Zonzerigué sheds light on a blind spot of contemporary leadership: the inner dimension. This book powerfully reminds us that true transformative power begins within. A must-read for every leader.',
+        },
+        {
+          name: 'Prof. Bakayoko Ismaila — University of Cocody (Abidjan)',
+          text:
+            'This book is demanding in its clarity and offers a genuine education in leadership. Each chapter provides concrete levers for changing attitudes… As I read, I felt it was speaking directly to me. Bravo!',
+        },
+        {
+          name: 'Siaka Soro — Employee',
+          text:
+            'Reading The Leader’s Forge was a revelation for me. You discover that leadership is not reserved for senior managers or executives, but begins in how each of us knows ourselves and acts daily. This book helped me value my strengths, understand my limits, and see that—even at my level—I can inspire, influence, and contribute positively around me.',
+        },
+        {
+          name: 'Plexie Koné-Mayne — Head of Recruitment Task Force, Caisse des Dépôts et Consignations (Paris)',
+          text:
+            'The Leader’s Forge confronts us with a reality we often ignore: leadership is neither improvised nor decreed. It is built, step by step, by capitalizing on our experiences, strengths, and vulnerabilities. True leadership always begins with meeting oneself. Clear and inspiring, this book shows a deeply human leadership that finds its place at work, in personal life, and in society.',
+        },
+        {
+          name: 'Dr. Kouadio Antoine — University of Cocody (Abidjan)',
+          text:
+            'This is not yet another book on technical leadership, but an inner exploration—rigorously sustained across the three parts (Mindset, Skills, Character). It is particularly moving in its focus on the leader’s inner life and authenticity. The idea that leadership is not a role to play but a way of being is refreshing and profound.',
+        },
+        {
+          name: 'Awa Diomandé — Abidjan',
+          text:
+            'The Leader’s Forge lays the reader bare. It confronts you with aspects of yourself you would often rather ignore. It is a disquieting read—but a liberating one.',
+        },
+        {
+          name: 'Nader Nahle — Abidjan',
+          text:
+            'Every passage spoke to me powerfully. The depth and authenticity truly stand apart from most leadership books. It doesn’t just hand you a set of keys—it pushes you into genuine introspection.',
+        },
+      ],
+      outro: [
+        "So many voices confirm the same truth: this book is an inner invitation to authentic leadership.",
+        "And you — are you ready to step into The Leader’s Forge?",
       ],
     },
     faq: {

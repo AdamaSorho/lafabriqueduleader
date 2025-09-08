@@ -10,7 +10,7 @@ const ddb = new DynamoDBClient({})
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': process.env.CORS_ORIGIN || '*',
-  'Access-Control-Allow-Methods': 'OPTIONS,POST',
+  'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
   'Access-Control-Allow-Headers': 'Content-Type',
 }
 
@@ -96,8 +96,8 @@ export const handler = async (event) => {
         await ddb.send(new UpdateItemCommand({
           TableName: process.env.DDB_TABLE,
           Key: { email: { S: email } },
-          UpdateExpression: 'SET #s = :v, verifiedAt = :t, source = if_not_exists(source, :src)',
-          ExpressionAttributeNames: { '#s': 'status' },
+          UpdateExpression: 'SET #s = :v, verifiedAt = :t, #src = if_not_exists(#src, :src)',
+          ExpressionAttributeNames: { '#s': 'status', '#src': 'source' },
           ExpressionAttributeValues: {
             ':v': { S: 'verified' },
             ':t': { N: String(Date.now()) },

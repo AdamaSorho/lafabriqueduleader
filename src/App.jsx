@@ -50,6 +50,8 @@ function LangToggle({ lang, setLang }) {
 }
 
 function Nav({ lang, setLang, strings }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const closeMobile = () => setMobileOpen(false);
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
@@ -63,35 +65,58 @@ function Nav({ lang, setLang, strings }) {
           <a
             href="#why"
             className="text-sm font-medium text-gray-700 hover:text-black"
+            onClick={closeMobile}
           >
             {lang === "fr" ? "Pourquoi" : "Why"}
           </a>
           <a
             href="#author"
             className="text-sm font-medium text-gray-700 hover:text-black"
+            onClick={closeMobile}
           >
             {lang === "fr" ? "Auteur" : "Author"}
           </a>
           <a
             href="#about"
             className="text-sm font-medium text-gray-700 hover:text-black"
+            onClick={closeMobile}
           >
             {lang === "fr" ? "À propos" : "About"}
           </a>
           <a
+            
+          ></a>
+          <a
             href="#learn"
             className="text-sm font-medium text-gray-700 hover:text-black"
+            onClick={closeMobile}
           >
             {lang === "fr" ? "Apprentissages" : "Learn"}
           </a>
           <a
             href="#faq"
             className="text-sm font-medium text-gray-700 hover:text-black"
+            onClick={closeMobile}
           >
             FAQ
           </a>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-full p-2 text-gray-700 hover:bg-gray-50 md:hidden"
+            aria-label={mobileOpen ? (lang === 'fr' ? 'Fermer le menu' : 'Close menu') : (lang === 'fr' ? 'Ouvrir le menu' : 'Open menu')}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            {mobileOpen ? (
+              <span className="text-xl leading-none">×</span>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                <path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z" />
+              </svg>
+            )}
+          </button>
           <LangToggle lang={lang} setLang={setLang} />
           <a
             href="#contact"
@@ -101,6 +126,18 @@ function Nav({ lang, setLang, strings }) {
           </a>
         </div>
       </nav>
+      {mobileOpen && (
+        <div className="mx-auto block max-w-6xl px-4 pb-4 sm:px-6 lg:px-8 md:hidden">
+          <div className="mt-2 grid gap-2 rounded-2xl border border-black/10 bg-white p-3">
+            <a href="#why" onClick={closeMobile} className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">{lang === 'fr' ? 'Pourquoi' : 'Why'}</a>
+            <a href="#author" onClick={closeMobile} className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">{lang === 'fr' ? 'Auteur' : 'Author'}</a>
+            <a href="#about" onClick={closeMobile} className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">{lang === 'fr' ? 'À propos' : 'About'}</a>
+            
+            <a href="#learn" onClick={closeMobile} className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">{lang === 'fr' ? 'Apprentissages' : 'Learn'}</a>
+            <a href="#faq" onClick={closeMobile} className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">FAQ</a>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -224,7 +261,7 @@ function AuthorSection({ strings }) {
     return { __html: html };
   };
   return (
-    <section id="author" className="relative isolate py-10 sm:py-14">
+    <section id="author" className="relative isolate py-10 sm:py-14 scroll-mt-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-3xl border border-black/10 bg-neutral-950 text-white">
           <div className="grid md:grid-cols-2">
@@ -297,38 +334,131 @@ function AboutBook({ strings }) {
   );
 }
 
-function Testimonials({ strings }) {
+function Testimonials({ strings, onOpenExcerpt }) {
   const quotes = strings.testimonials.quotes;
+  const intro = strings.testimonials.intro;
+  const outro = strings.testimonials.outro;
   return (
-    <div className="grid gap-6 md:grid-cols-3">
-      {quotes.map((q, i) => (
-        <figure
-          key={i}
-          className="rounded-3xl border border-black/10 bg-white p-6"
-        >
-          <div
-            className="mb-3 flex items-center gap-1 text-yellow-400"
-            aria-hidden
+    <div className="space-y-6">
+      {intro && (
+        <p className="text-sm text-gray-700">{intro}</p>
+      )}
+      <div className="grid gap-6 md:grid-cols-3">
+        {quotes.map((q, i) => (
+          <figure
+            key={i}
+            className="rounded-3xl border border-black/10 bg-white p-6"
           >
-            {[0, 1, 2, 3, 4].map((s) => (
-              <svg
-                key={s}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className="size-[18px]"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.802 2.036a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.802-2.036a1 1 0 00-1.175 0l-2.802 2.036c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            ))}
+            <div
+              className="mb-3 flex items-center gap-1 text-yellow-400"
+              aria-hidden
+            >
+              {[0, 1, 2, 3, 4].map((s) => (
+                <svg
+                  key={s}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="size-[18px]"
+                >
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.802 2.036a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.802-2.036a1 1 0 00-1.175 0l-2.802 2.036c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
+            </div>
+            <blockquote className="text-sm text-gray-700">“{q.text}”</blockquote>
+            <figcaption className="mt-4 text-xs font-semibold text-gray-700">
+              {q.name}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      {outro && (
+        <div className="mt-2">
+          <div className="mb-3 flex justify-center text-black/20" aria-hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-8 w-8">
+              <path d="M7.17 6C5.97 6 5 6.97 5 8.17v3.66C5 13.03 5.97 14 7.17 14H9v4H3v-8.17C3 7.41 5.41 5 8.83 5H9v1H7.17zM18.17 6C16.97 6 16 6.97 16 8.17v3.66C16 13.03 16.97 14 18.17 14H20v4h-6v-8.17C14 7.41 16.41 5 19.83 5H20v1h-1.83z"/>
+            </svg>
           </div>
-          <blockquote className="text-sm text-gray-700">“{q.text}”</blockquote>
-          <figcaption className="mt-4 text-xs font-semibold text-gray-700">
-            {q.name}
-          </figcaption>
-        </figure>
-      ))}
+          <blockquote className="mx-auto max-w-3xl text-center text-lg sm:text-xl md:text-2xl italic text-gray-900 space-y-2">
+            {Array.isArray(outro) ? (
+              outro.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))
+            ) : (
+              <p>{outro}</p>
+            )}
+          </blockquote>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="#contact"
+              className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-black/90"
+            >
+              {strings.hero.ctas.preorder}
+            </a>
+            <button
+              type="button"
+              onClick={onOpenExcerpt}
+              className="inline-flex items-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50"
+            >
+              {strings.hero.ctas.excerpt}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function PrefaceSection({ strings, onOpenExcerpt }) {
+  const preface = strings.preface;
+  if (!preface) return null;
+  const { title, quote, author } = preface;
+  const photoSrc = author?.photo || '';
+  return (
+    <Section id="preface" eyebrow={strings.hero.brand} title={title}>
+      <div className="grid items-center gap-6 md:grid-cols-[1fr_2fr]">
+        {photoSrc ? (
+          <div className="flex justify-center">
+            <img
+              src={photoSrc}
+              alt={author?.name || 'Auteur de la préface'}
+              className="h-56 w-56 rounded-2xl object-cover border border-black/10 shadow-sm"
+            />
+          </div>
+        ) : (
+          <div className="flex h-56 w-56 items-center justify-center rounded-2xl border border-dashed border-black/10 text-xs text-gray-400">
+            Ajouter une photo (public/...)
+          </div>
+        )}
+        <figure className="rounded-3xl border border-black/10 bg-white p-6">
+          <div className="mb-3 flex justify-center text-black/20" aria-hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-8 w-8">
+              <path d="M7.17 6C5.97 6 5 6.97 5 8.17v3.66C5 13.03 5.97 14 7.17 14H9v4H3v-8.17C3 7.41 5.41 5 8.83 5H9v1H7.17zM18.17 6C16.97 6 16 6.97 16 8.17v3.66C16 13.03 16.97 14 18.17 14H20v4h-6v-8.17C14 7.41 16.41 5 19.83 5H20v1h-1.83z"/>
+            </svg>
+          </div>
+          <blockquote className="mx-auto max-w-3xl text-center text-lg sm:text-xl italic text-gray-900">“{quote}”</blockquote>
+          <figcaption className="mt-4 text-center text-xs font-semibold text-gray-700">
+            {author?.name}
+            {author?.role ? <span className="text-gray-500"> — {author.role}</span> : null}
+          </figcaption>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="#contact"
+              className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-black/90"
+            >
+              {strings.hero.ctas.preorder}
+            </a>
+            <button
+              type="button"
+              onClick={onOpenExcerpt}
+              className="inline-flex items-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50"
+            >
+              {strings.hero.ctas.excerpt}
+            </button>
+          </div>
+        </figure>
+      </div>
+    </Section>
   );
 }
 
@@ -535,12 +665,14 @@ export default function App() {
             ))}
           </ul>
         </Section>
+        {/** Preface temporarily disabled until content is ready */}
+        {/** <PrefaceSection strings={strings} onOpenExcerpt={() => setExcerptOpen(true)} /> */}
         <Section
           id="temoignages"
           eyebrow={strings.hero.brand}
           title={strings.testimonials.title}
         >
-          <Testimonials strings={strings} />
+          <Testimonials strings={strings} onOpenExcerpt={() => setExcerptOpen(true)} />
         </Section>
         <Section
           id="faq"

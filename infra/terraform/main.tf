@@ -9,6 +9,10 @@ terraform {
       source  = "hashicorp/archive"
       version = ">= 2.4"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.0"
+    }
   }
 }
 
@@ -152,7 +156,7 @@ resource "null_resource" "build_lambda" {
 data "archive_file" "lambda_zip" {
   count       = var.enable_api ? 1 : 0
   type        = "zip"
-  source_file = "../../aws/lambda/subscribe-and-send/dist/index.mjs"
+  source_file = "../../aws/lambda/subscribe-and-send/dist/index.cjs"
   output_path = "./.terraform/${var.project}-lambda.zip"
   depends_on  = [null_resource.build_lambda]
 }
@@ -218,7 +222,7 @@ resource "aws_iam_policy" "ddb_put" {
     Version = "2012-10-17",
     Statement = [{
       Effect = "Allow",
-      Action = ["dynamodb:PutItem"],
+      Action = ["dynamodb:PutItem", "dynamodb:UpdateItem"],
       Resource = "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.ddb_table}"
     }]
   })
@@ -260,7 +264,7 @@ resource "aws_lambda_function_url" "api" {
   authorization_type  = "NONE"
   cors {
     allow_origins = [var.cors_origin]
-    allow_methods = ["GET", "POST", "OPTIONS"]
+    allow_methods = ["GET", "POST"]
     allow_headers = ["content-type"]
   }
 }
@@ -270,3 +274,4 @@ output "api_base_url" {
 }
 output "site_bucket" { value = aws_s3_bucket.site.bucket }
 output "cloudfront_domain" { value = aws_cloudfront_distribution.cdn.domain_name }
+output "cloudfront_distribution_id" { value = aws_cloudfront_distribution.cdn.id }

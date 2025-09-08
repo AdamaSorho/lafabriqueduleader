@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:lambda": "esbuild aws/lambda/subscribe-and-send/index.mjs --bundle --platform=node --target=node20 --format=esm --outfile=aws/lambda/subscribe-and-send/dist/index.mjs",
+    "build:lambda": "esbuild aws/lambda/subscribe-and-send/index.mjs --bundle --platform=node --target=node20 --format=cjs --outfile=aws/lambda/subscribe-and-send/dist/index.cjs",
     "check:lambda": "npm run -s build:lambda && node aws/lambda/subscribe-and-send/check.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "@aws-sdk/client-sesv2": "^3.645.0",
+    "@aws-sdk/client-dynamodb": "^3.645.0"
   },
   "devDependencies": {
     "esbuild": "^0.25.9",

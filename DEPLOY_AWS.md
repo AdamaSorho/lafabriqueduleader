@@ -6,6 +6,15 @@ Overview
 - Email sending: Amazon SES (verified domain/sender)
 - Newsletter storage: Mailchimp (optional) or DynamoDB (optional)
 
+Makefile shortcuts and local overrides
+- Use `make deploy-skip-build` to deploy quickly. These targets wrap `scripts/deploy-frontend.sh`.
+- You can set local, unversioned defaults by creating a `.make.local` file at the repo root:
+  - Example `.make.local`:
+    - `PROFILE=TerraformMindapax`
+    - `SITE_BUCKET=your-unique-bucket`
+    - `CLOUDFRONT_DOMAIN=dxxxx.cloudfront.net` (or your custom CNAME)
+- Do not commit `.make.local` (it is gitignored). This keeps environment-specific values out of the repo.
+
 Terraform workflow (recommended)
 - Prereqs: Terraform ≥1.5, AWS CLI configured, and an S3 bucket name that is globally unique. SES domain should be verified with DKIM (see step 3 below).
 - Configure variables:

@@ -22,10 +22,13 @@ Options:
 
 Env:
   AWS_PROFILE    Optional, AWS CLI profile to use
+  SITE_BUCKET    Override S3 bucket name (skip Terraform for bucket)
+  CLOUDFRONT_DOMAIN   CloudFront domain (dxxxx.cloudfront.net) or custom CNAME
 
 This script expects Terraform outputs in $TF_DIR to include:
   - site_bucket (S3 bucket name)
   - cloudfront_domain (CloudFront domain)
+  - cloudfront_distribution_id (CloudFront distribution ID) — optional
 EOF
 }
 
@@ -59,22 +62,49 @@ if [[ ! -d "$DIST_DIR" ]]; then
   exit 1
 fi
 
-echo "==> Reading Terraform outputs"
-BUCKET=$(terraform -chdir="$TF_DIR" output -raw site_bucket)
-DOMAIN=$(terraform -chdir="$TF_DIR" output -raw cloudfront_domain)
+echo "==> Resolving deployment targets"
 
-if [[ -z "${BUCKET:-}" || -z "${DOMAIN:-}" ]]; then
-  echo "Could not get required outputs (site_bucket, cloudfront_domain)" >&2
+# Resolve S3 bucket
+if [[ -n "${SITE_BUCKET:-}" ]]; then
+  BUCKET="$SITE_BUCKET"
+else
+  BUCKET=$(terraform -chdir="$TF_DIR" output -raw site_bucket)
+fi
+if [[ -z "${BUCKET:-}" ]]; then
+  echo "Missing S3 bucket. Set SITE_BUCKET or ensure Terraform output 'site_bucket' exists." >&2
   exit 1
 fi
-
 echo "S3 Bucket: $BUCKET"
-echo "CloudFront Domain: $DOMAIN"
 
-echo "==> Resolving CloudFront distribution ID"
-DIST_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?DomainName=='$DOMAIN'].Id | [0]" --output text)
+# Resolve CloudFront domain
+if [[ -n "${CLOUDFRONT_DOMAIN:-}" ]]; then
+  DOMAIN="$CLOUDFRONT_DOMAIN"
+else
+  DOMAIN=$(terraform -chdir="$TF_DIR" output -raw cloudfront_domain || true)
+fi
+if [[ -n "${DOMAIN:-}" ]]; then
+  echo "CloudFront Domain: $DOMAIN"
+else
+  echo "CloudFront Domain: <not provided>"
+fi
+
+# Resolve CloudFront distribution ID (prefer domain, fall back to TF output)
+if [[ -n "${DOMAIN:-}" ]]; then
+  echo "==> Resolving CloudFront distribution ID from domain"
+  DIST_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?DomainName=='$DOMAIN'].Id | [0]" --output text)
+  if [[ -z "${DIST_ID:-}" || "$DIST_ID" == "None" || "$DIST_ID" == "null" ]]; then
+    echo "==> Trying alias-based lookup for custom domain"
+    DIST_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Aliases.Items && contains(Aliases.Items, '$DOMAIN')].Id | [0]" --output text)
+  fi
+fi
+
 if [[ -z "${DIST_ID:-}" || "$DIST_ID" == "None" || "$DIST_ID" == "null" ]]; then
-  echo "Could not resolve CloudFront distribution ID for domain: $DOMAIN" >&2
+  # Try Terraform output fallback if resolution by domain failed or domain not provided
+  DIST_ID=$(terraform -chdir="$TF_DIR" output -raw cloudfront_distribution_id 2>/dev/null || true)
+fi
+
+if [[ -z "${DIST_ID:-}" || "$DIST_ID" == "None" || "$DIST_ID" == "null" ]]; then
+  echo "Could not resolve CloudFront distribution ID. Provide CLOUDFRONT_DOMAIN or ensure Terraform outputs are available." >&2
   exit 1
 fi
 echo "CloudFront Distribution ID: $DIST_ID"
@@ -110,6 +140,10 @@ aws s3 cp "$DIST_DIR/index.html" "s3://$BUCKET/index.html" \
 echo "==> Creating CloudFront invalidation for HTML entry points"
 aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/index.html" "/" >/dev/null
 
-echo "✅ Frontend deployed: https://$DOMAIN/"
+if [[ -n "${DOMAIN:-}" ]]; then
+  echo "✅ Frontend deployed: https://$DOMAIN/"
+else
+  echo "✅ Frontend deployed (Dist ID: $DIST_ID)"
+fi
 
 popd >/dev/null

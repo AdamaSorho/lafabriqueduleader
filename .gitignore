@@ -47,3 +47,6 @@ infra/terraform/override.tf.json
 infra/terraform/*_override.tf
 infra/terraform/*_override.tf.json
 infra/terraform/*.tfplan
+
+# Local Makefile overrides (not committed)
+.make.local
