@@ -252,7 +252,7 @@ resource "aws_lambda_function" "api" {
       MAILCHIMP_SERVER_PREFIX   = var.mailchimp_server_prefix
       MAILCHIMP_LIST_ID         = var.mailchimp_list_id
       DDB_TABLE                 = var.ddb_table
-      CORS_ORIGIN               = var.cors_origin
+      CORS_ORIGINS              = var.cors_origin
       LINK_SIGNING_SECRET       = var.link_signing_secret
     }
   }
@@ -263,7 +263,7 @@ resource "aws_lambda_function_url" "api" {
   function_name       = aws_lambda_function.api[0].function_name
   authorization_type  = "NONE"
   cors {
-    allow_origins = [var.cors_origin]
+    allow_origins = split(",", var.cors_origin)
     allow_methods = ["GET", "POST"]
     allow_headers = ["content-type"]
   }

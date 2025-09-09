@@ -8,23 +8,20 @@ import crypto from 'crypto'
 const ses = new SESv2Client({})
 const ddb = new DynamoDBClient({})
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': process.env.CORS_ORIGIN || '*',
-  'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
-  'Access-Control-Allow-Headers': 'Content-Type',
-}
+// Note: CORS headers are handled by the Lambda Function URL configuration.
+// We intentionally do not set Access-Control-* headers here to avoid duplicates.
 
 export const handler = async (event) => {
   const method = event.requestContext?.http?.method
   const path = event.requestContext?.http?.path || ''
   if (method === 'OPTIONS') {
-    return { statusCode: 200, headers: corsHeaders, body: '' }
+    return { statusCode: 200, body: '' }
   }
   try {
     if (method === 'POST') {
       const { email, lang = 'fr' } = JSON.parse(event.body || '{}')
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return { statusCode: 400, headers: corsHeaders, body: 'Invalid email' }
+        return { statusCode: 400, body: 'Invalid email' }
       }
 
       const siteUrl = (process.env.SITE_URL || '').replace(/\/$/, '')
@@ -74,7 +71,7 @@ export const handler = async (event) => {
         })
       }
 
-      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true }) }
+      return { statusCode: 200, body: JSON.stringify({ ok: true }) }
     }
 
     // GET /verify-excerpt?e=...&sig=...
@@ -85,12 +82,12 @@ export const handler = async (event) => {
       const siteUrl = (process.env.SITE_URL || '').replace(/\/$/, '')
       const secret = process.env.LINK_SIGNING_SECRET || ''
       if (!email || !sig) {
-        return { statusCode: 400, headers: corsHeaders, body: 'Missing parameters' }
+        return { statusCode: 400, body: 'Missing parameters' }
       }
       if (!secret) throw new Error('LINK_SIGNING_SECRET not set')
       const expected = crypto.createHmac('sha256', secret).update(email).digest('hex')
       if (sig !== expected) {
-        return { statusCode: 400, headers: corsHeaders, body: 'Invalid signature' }
+        return { statusCode: 400, body: 'Invalid signature' }
       }
       if (process.env.DDB_TABLE) {
         await ddb.send(new UpdateItemCommand({
@@ -105,16 +102,12 @@ export const handler = async (event) => {
           },
         }))
       }
-      return {
-        statusCode: 302,
-        headers: { ...corsHeaders, Location: `${siteUrl}/excerpt.pdf` },
-        body: '',
-      }
+      return { statusCode: 302, headers: { Location: `${siteUrl}/excerpt.pdf` }, body: '' }
     }
 
-    return { statusCode: 405, headers: corsHeaders, body: 'Method not allowed' }
+    return { statusCode: 405, body: 'Method not allowed' }
   } catch (err) {
     console.error(err)
-    return { statusCode: 500, headers: corsHeaders, body: typeof err?.message === 'string' ? err.message : 'Internal Error' }
+    return { statusCode: 500, body: typeof err?.message === 'string' ? err.message : 'Internal Error' }
   }
 }
