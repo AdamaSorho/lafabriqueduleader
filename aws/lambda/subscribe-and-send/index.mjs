@@ -38,11 +38,14 @@ export const handler = async (event) => {
       // Send via SES
       const fromEmail = process.env.FROM_EMAIL
       if (!fromEmail) throw new Error('FROM_EMAIL not set')
-      await ses.send(new SendEmailCommand({
+      const params = {
         FromEmailAddress: fromEmail,
         Destination: { ToAddresses: [email] },
         Content: { Simple: { Subject: { Data: subject }, Body: { Html: { Data: html } } } },
-      }))
+      }
+      const configSet = process.env.SES_CONFIG_SET
+      if (configSet) params.ConfigurationSetName = configSet
+      await ses.send(new SendEmailCommand(params))
 
       // Store in DynamoDB with pending status
       if (process.env.DDB_TABLE) {

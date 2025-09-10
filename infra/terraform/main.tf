@@ -253,6 +253,7 @@ resource "aws_lambda_function" "api" {
       MAILCHIMP_LIST_ID         = var.mailchimp_list_id
       DDB_TABLE                 = var.ddb_table
       CORS_ORIGINS              = var.cors_origin
+      SES_CONFIG_SET            = aws_sesv2_configuration_set.main[0].configuration_set_name
       LINK_SIGNING_SECRET       = var.link_signing_secret
     }
   }
@@ -274,4 +275,132 @@ output "api_base_url" {
 }
 output "site_bucket" { value = aws_s3_bucket.site.bucket }
 output "cloudfront_domain" { value = aws_cloudfront_distribution.cdn.domain_name }
+# SES bounce/complaint tracking (SNS + Lambda)
+locals {
+  ses_config_name = "${var.project}-ses-config"
+}
+
+resource "aws_sns_topic" "ses_events" {
+  count = var.enable_api ? 1 : 0
+  name  = "${var.project}-ses-events"
+}
+
+resource "aws_sns_topic_policy" "ses_events" {
+  count  = var.enable_api ? 1 : 0
+  arn    = aws_sns_topic.ses_events[0].arn
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid       = "AllowSESPublish",
+        Effect    = "Allow",
+        Principal = { Service = "ses.amazonaws.com" },
+        Action    = ["SNS:Publish"],
+        Resource  = aws_sns_topic.ses_events[0].arn,
+        Condition = {
+          StringEquals = {
+            "AWS:SourceAccount" = data.aws_caller_identity.current.account_id
+          },
+          StringLike = {
+            "AWS:SourceArn" = "arn:aws:ses:${var.region}:${data.aws_caller_identity.current.account_id}:configuration-set/${local.ses_config_name}"
+          }
+        }
+      }
+    ]
+  })
+}
+
+# Build and package SES events Lambda
+resource "null_resource" "build_lambda_ses_events" {
+  count = var.enable_api ? 1 : 0
+  triggers = {
+    src_hash = filesha256("../../aws/lambda/ses-events/index.mjs")
+  }
+  provisioner "local-exec" {
+    command = "cd ../../ && npm run -s build:lambda:ses-events"
+  }
+}
+
+data "archive_file" "lambda_zip_ses_events" {
+  count       = var.enable_api ? 1 : 0
+  type        = "zip"
+  source_file = "../../aws/lambda/ses-events/dist/index.cjs"
+  output_path = "./.terraform/${var.project}-ses-events-lambda.zip"
+  depends_on  = [null_resource.build_lambda_ses_events]
+}
+
+resource "aws_iam_role" "ses_events_exec" {
+  count              = var.enable_api ? 1 : 0
+  name               = "${var.project}-ses-events-exec"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole",
+      Principal = { Service = "lambda.amazonaws.com" },
+      Effect = "Allow"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ses_events_basic" {
+  count      = var.enable_api ? 1 : 0
+  role       = aws_iam_role.ses_events_exec[0].name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "ses_events_ddb_attach" {
+  count      = var.enable_api && var.ddb_table != "" ? 1 : 0
+  role       = aws_iam_role.ses_events_exec[0].name
+  policy_arn = aws_iam_policy.ddb_put[0].arn
+}
+
+resource "aws_lambda_function" "ses_events" {
+  count         = var.enable_api ? 1 : 0
+  function_name = "${var.project}-ses-events"
+  filename      = data.archive_file.lambda_zip_ses_events[0].output_path
+  handler       = "index.handler"
+  runtime       = "nodejs20.x"
+  role          = aws_iam_role.ses_events_exec[0].arn
+
+  source_code_hash = data.archive_file.lambda_zip_ses_events[0].output_base64sha256
+
+  environment {
+    variables = {
+      DDB_TABLE = var.ddb_table
+    }
+  }
+}
+
+resource "aws_lambda_permission" "sns_invoke_ses_events" {
+  count         = var.enable_api ? 1 : 0
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.ses_events[0].function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.ses_events[0].arn
+}
+
+resource "aws_sns_topic_subscription" "ses_events_lambda" {
+  count     = var.enable_api ? 1 : 0
+  topic_arn = aws_sns_topic.ses_events[0].arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.ses_events[0].arn
+}
+
+resource "aws_sesv2_configuration_set" "main" {
+  count                     = var.enable_api ? 1 : 0
+  configuration_set_name    = local.ses_config_name
+}
+
+resource "aws_sesv2_configuration_set_event_destination" "sns_dest" {
+  count                         = var.enable_api ? 1 : 0
+  configuration_set_name        = aws_sesv2_configuration_set.main[0].configuration_set_name
+  event_destination_name        = "sns-bounces-complaints"
+  event_destination {
+    matching_event_types = ["BOUNCE", "COMPLAINT"]
+    enabled              = true
+    sns_destination { topic_arn = aws_sns_topic.ses_events[0].arn }
+  }
+  depends_on = [aws_sns_topic_policy.ses_events]
+}
 output "cloudfront_distribution_id" { value = aws_cloudfront_distribution.cdn.id }

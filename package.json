@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:lambda": "esbuild aws/lambda/subscribe-and-send/index.mjs --bundle --platform=node --target=node20 --format=cjs --outfile=aws/lambda/subscribe-and-send/dist/index.cjs",
+    "build:lambda:ses-events": "esbuild aws/lambda/ses-events/index.mjs --bundle --platform=node --target=node20 --format=cjs --outfile=aws/lambda/ses-events/dist/index.cjs",
     "check:lambda": "npm run -s build:lambda && node aws/lambda/subscribe-and-send/check.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
