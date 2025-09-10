@@ -1,4 +1,4 @@
-.PHONY: help deploy deploy-skip-build deploy-dry-run deploy-skip-build-dry-run
+.PHONY: help deploy deploy-skip-build deploy-dry-run deploy-skip-build-dry-run report
 
 # Load local overrides (not committed). Create .make.local to set defaults:
 #   PROFILE=TerraformMindapax
@@ -23,6 +23,7 @@ help:
 	@echo "  make deploy [PROFILE=...] [SITE_BUCKET=...] [CLOUDFRONT_DOMAIN=...] [ARGS='--skip-build']"
 	@echo "  make deploy-skip-build [PROFILE=...] [SITE_BUCKET=...] [CLOUDFRONT_DOMAIN=...]"
 	@echo "  make deploy-dry-run [PROFILE=...] [SITE_BUCKET=...] [CLOUDFRONT_DOMAIN=...]"
+	@echo "  make report [PROFILE=...] [TABLE=newsletter_signups] [HOURS=72 | SINCE=ISO] [REGION=us-east-1]"
 	@echo
 	@echo "Variables: PROFILE, SITE_BUCKET, CLOUDFRONT_DOMAIN, ARGS (or set them in .make.local)"
 
@@ -40,3 +41,16 @@ deploy-dry-run:
 
 deploy-skip-build-dry-run:
 	@$(MAKE) deploy ARGS="--skip-build --dry-run" PROFILE=$(PROFILE) SITE_BUCKET=$(SITE_BUCKET) CLOUDFRONT_DOMAIN=$(CLOUDFRONT_DOMAIN)
+
+# Summarize recent signup records from DynamoDB
+# Examples:
+#   make report PROFILE=TerraformMindapax TABLE=newsletter_signups HOURS=72
+#   make report PROFILE=TerraformMindapax TABLE=newsletter_signups SINCE=2025-09-07T00:00:00Z
+report:
+	@AWS_PROFILE=$(PROFILE) \
+	AWS_REGION=$(REGION) \
+	node scripts/report-signups.mjs \
+		$(if $(TABLE),--table $(TABLE),) \
+		$(if $(HOURS),--hours $(HOURS),) \
+		$(if $(SINCE),--since $(SINCE),) \
+		$(if $(REGION),--region $(REGION),)
