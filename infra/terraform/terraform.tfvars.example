@@ -14,6 +14,8 @@ cors_origin = "https://lafabriqueduleader.com"
 
 # FROM address used by SES in Lambda (must be part of a verified SES identity)
 from_email = "La Fabrique <no-reply@lafabriqueduleader.com>"
+# Optional: where pre-order notifications are sent. If empty, FROM_EMAIL is used.
+preorder_to_email = "orders@lafabriqueduleader.com"
 
 # Enable the API (API Gateway + Lambda). Required for the excerpt email flow.
 enable_api = true
@@ -21,15 +23,19 @@ enable_api = true
 # Secret used to sign verification links (use a long random string)
 link_signing_secret = "<generate-a-long-random-string>"
 
-# Optional: Mailchimp values (leave empty to skip)
-mailchimp_api_key       = ""
-mailchimp_server_prefix = ""
-mailchimp_list_id       = ""
+# Optional: Cloudflare Turnstile secret key for bot protection
+turnstile_secret_key = "<turnstile-secret-key>"
 
 # Optional: DynamoDB table name to store signups
 # If set, Terraform will create the table with partition key `email` (S)
 # and grant Lambda permission to PutItem. Leave empty to skip creating/using DynamoDB.
 ddb_table = "newsletter_signups"
+# Optional: dedicated table for preorders
+preorders_ddb_table = "book_preorders"
+
+# Excerpt files (upload these PDFs to your site bucket, under these keys)
+excerpt_fr_s3_key = "private/excerpts/excerpt-fr.pdf"
+excerpt_en_s3_key = "private/excerpts/excerpt-en.pdf"
 
 # Optional: CloudFront custom domain. If you want to serve via your domain,
 # set aliases and ACM certificate ARN (in us-east-1) for those names.

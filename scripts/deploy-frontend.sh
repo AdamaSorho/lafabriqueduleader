@@ -129,7 +129,7 @@ echo "==> Syncing other static files (short cache)"
 aws s3 sync "$DIST_DIR" "s3://$BUCKET" \
   ${DRY_ARG[@]:-} \
   --delete \
-  --exclude 'assets/*' --exclude 'index.html' \
+  --exclude 'assets/*' --exclude 'index.html' --exclude 'excerpt*.pdf' \
   --cache-control 'public,max-age=300' >/dev/null
 
 echo "==> Uploading index.html (no-cache)"

@@ -4,7 +4,8 @@ Overview
 - Static site: S3 + CloudFront
 - API endpoint: Lambda Function URL (Node.js 20)
 - Email sending: Amazon SES (verified domain/sender)
-- Newsletter storage: Mailchimp (optional) or DynamoDB (optional)
+- Optional storage: DynamoDB for excerpt/preorder records
+- Pre-order flow: modal posts to `POST /preorder`, emails your team, optional DynamoDB log
 
 Makefile shortcuts and local overrides
 - Use `make deploy-skip-build` to deploy quickly. These targets wrap `scripts/deploy-frontend.sh`.
@@ -23,7 +24,9 @@ Terraform workflow (recommended)
      - Set `site_bucket_name`, `site_url`, `cors_origin`, and `from_email`.
      - Set `link_signing_secret` to a long random string (used to sign download links).
      - Ensure `enable_api = true` to provision the Lambda + API.
-     - Optionally set `ddb_table` to create a DynamoDB table for signups (partition key: `email` [S]).
+     - Optionally set `ddb_table` to create a DynamoDB table for excerpt signups (partition key: `email` [S]).
+     - Optionally set `preorders_ddb_table` for pre-orders (recommended; prevents key collisions with signups).
+     - Optionally set `preorder_to_email` to route pre-order notifications to a specific inbox.
      - Optionally set `aliases` and `acm_certificate_arn` (must be us-east-1) to use your own domain on CloudFront.
   2) Initialize/apply:
      - `terraform -chdir=infra/terraform init`
@@ -58,9 +61,18 @@ Frontend API base
 
 Verification/anti-fake emails flow
 - The Lambda now includes a signed link in the email that points to `https://yourdomain.com/download.html?e=...&sig=...`.
-- The `download.html` page redirects the browser to the API `GET /verify-excerpt` with those parameters.
-- The Lambda verifies the signature and, if valid, updates DynamoDB (`status=verified`, `verifiedAt=ts`) and responds with a redirect to `/excerpt.pdf`.
+- The `download.html` page redirects the browser to the API `GET /verify-excerpt` with those parameters and the selected `lang`.
+- The Lambda verifies the signature and, if valid, updates DynamoDB (`status=verified`, `verifiedAt=ts`) and streams the PDF directly (no public URL).
 - This marks only those who clicked as verified, helping you avoid fake addresses.
+
+Unsubscribe
+- Every excerpt email now includes:
+  - A visible unsubscribe link in the body.
+  - Standard headers `List-Unsubscribe` and `List-Unsubscribe-Post: List-Unsubscribe=One-Click`.
+- The API handles both:
+  - `GET /unsubscribe?e=..&sig=..` → marks `status=unsubscribed` and redirects to `/unsubscribed.html`.
+  - `GET|POST /one-click-unsubscribe?e=..&sig=..` → marks `status=unsubscribed` and returns 200.
+- Suppression: Subsequent submissions from unsubscribed emails are rejected.
 
 4) Lambda API (subscribe-and-send)
 - Region: us-east-1 (SES available in many regions; adjust as needed).
@@ -72,8 +84,12 @@ Verification/anti-fake emails flow
 - Environment variables set in Terraform:
   - `SITE_URL` e.g. https://yourdomain.com
   - `FROM_EMAIL` e.g. La Fabrique <no-reply@yourdomain.com>
+  - `PREORDER_TO_EMAIL` optional recipient for pre-order notifications
   - `LINK_SIGNING_SECRET` for signed download links
-  - Optional Mailchimp: `MAILCHIMP_API_KEY`, `MAILCHIMP_SERVER_PREFIX`, `MAILCHIMP_LIST_ID`
+  - `TURNSTILE_SECRET_KEY` for server-side bot verification (Cloudflare Turnstile)
+  - Optional DynamoDB:
+    - `DDB_TABLE` (excerpt signups)
+    - `DDB_PREORDERS_TABLE` (pre-orders)
 
 5) Lambda Function URL (simpler/cheaper than API Gateway)
 - In Terraform, we provision a Function URL with CORS to your site and public auth (NONE).
@@ -84,8 +100,26 @@ Verification/anti-fake emails flow
 - Rebuild and redeploy the site so the modal posts to your API.
 
 Optional: Store emails in DynamoDB
-- Create a table `newsletter_signups` (partition key: `email` [S])
-- Grant Lambda `dynamodb:PutItem` on that table and set env `DDB_TABLE=newsletter_signups`.
+- Excerpt: create a table `newsletter_signups` (PK: `email` [S]); set `DDB_TABLE=newsletter_signups`.
+- Pre-orders: create a separate table (e.g., `book_preorders`) and set `DDB_PREORDERS_TABLE=book_preorders` to avoid overwriting by PK.
+- Note: current schema uses only the hash key `email`. If you prefer a single-table design, switch to a composite key (e.g., add `sk` and use `email#timestamp`).
+
+Pre-order endpoint
+- The same Lambda handles `POST /preorder` with payload:
+  - `{ name, email, phone?, format: 'print'|'digital', quantity, country?, notes?, lang? }`
+- On success, it emails your team and optionally logs to `DDB_PREORDERS_TABLE` (or `DDB_TABLE` if the former is unset).
+
+Bot protection and rate limiting
+- Frontend loads Turnstile and sends a token with each submission.
+- Backend verifies the token via `TURNSTILE_SECRET_KEY`. If verification fails, it rejects.
+- Basic per-email throttling: rejects repeated requests within 5 minutes when a DynamoDB record exists.
+- Suppression: if a previous record has `status` of `bounced` or `complained`, requests are rejected.
 
 Invalidate CloudFront
 - After uploading new builds, create an invalidation for `/*` so changes propagate.
+Excerpt files (private access)
+- Upload your PDFs to the site S3 bucket under private keys (defaults):
+  - `private/excerpts/excerpt-fr.pdf`
+  - `private/excerpts/excerpt-en.pdf`
+- Terraform passes these keys to the Lambda; the Lambda reads via s3:GetObject and returns the bytes. Files are not publicly exposed via CloudFront.
+- The frontend deploy excludes any `excerpt*.pdf` from upload to avoid public exposure.

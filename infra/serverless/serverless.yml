@@ -17,11 +17,14 @@ provider:
   environment:
     SITE_URL: ${env:SITE_URL}
     FROM_EMAIL: ${env:FROM_EMAIL}
-    MAILCHIMP_API_KEY: ${env:MAILCHIMP_API_KEY, ''}
-    MAILCHIMP_SERVER_PREFIX: ${env:MAILCHIMP_SERVER_PREFIX, ''}
-    MAILCHIMP_LIST_ID: ${env:MAILCHIMP_LIST_ID, ''}
+    PREORDER_TO_EMAIL: ${env:PREORDER_TO_EMAIL, ''}
+    DDB_PREORDERS_TABLE: ${env:DDB_PREORDERS_TABLE, ''}
     DDB_TABLE: ${env:DDB_TABLE, ''}
     CORS_ORIGIN: ${env:CORS_ORIGIN, '*'}
+    TURNSTILE_SECRET_KEY: ${env:TURNSTILE_SECRET_KEY, ''}
+    EXCERPT_S3_BUCKET: ${env:EXCERPT_S3_BUCKET, ''}
+    EXCERPT_FR_S3_KEY: ${env:EXCERPT_FR_S3_KEY, 'private/excerpts/excerpt-fr.pdf'}
+    EXCERPT_EN_S3_KEY: ${env:EXCERPT_EN_S3_KEY, 'private/excerpts/excerpt-en.pdf'}
 
 functions:
   subscribeAndSend:
@@ -30,6 +33,24 @@ functions:
       - httpApi:
           method: POST
           path: /subscribe-and-send
+      - httpApi:
+          method: POST
+          path: /preorder
+      - httpApi:
+          method: GET
+          path: /verify-excerpt
+      - httpApi:
+          method: GET
+          path: /unsubscribe
+      - httpApi:
+          method: POST
+          path: /unsubscribe
+      - httpApi:
+          method: GET
+          path: /one-click-unsubscribe
+      - httpApi:
+          method: POST
+          path: /one-click-unsubscribe
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -41,8 +62,17 @@ functions:
           - dynamodb:PutItem
         Resource:
           - arn:aws:dynamodb:*:*:table/${env:DDB_TABLE, ''}
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - arn:aws:dynamodb:*:*:table/${env:DDB_PREORDERS_TABLE, ''}
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+        Resource:
+          - arn:aws:s3:::${env:EXCERPT_S3_BUCKET, ''}/*
 
 package:
   patterns:
     - aws/lambda/subscribe-and-send/**
-

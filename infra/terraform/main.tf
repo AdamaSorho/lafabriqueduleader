@@ -149,7 +149,7 @@ resource "null_resource" "build_lambda" {
     src_hash = filesha256("../../aws/lambda/subscribe-and-send/index.mjs")
   }
   provisioner "local-exec" {
-    command = "cd ../../ && npm run -s build:lambda"
+    command = "cd ../../ && npm ci && npm run -s build:lambda"
   }
 }
 
@@ -215,6 +215,19 @@ resource "aws_dynamodb_table" "signups" {
   }
 }
 
+# Separate table for preorders (optional)
+resource "aws_dynamodb_table" "preorders" {
+  count         = var.preorders_ddb_table != "" ? 1 : 0
+  name          = var.preorders_ddb_table
+  billing_mode  = "PAY_PER_REQUEST"
+  hash_key      = "email"
+
+  attribute {
+    name = "email"
+    type = "S"
+  }
+}
+
 resource "aws_iam_policy" "ddb_put" {
   count  = var.enable_api && var.ddb_table != "" ? 1 : 0
   name   = "${var.project}-ddb-put"
@@ -234,6 +247,44 @@ resource "aws_iam_role_policy_attachment" "ddb_attach" {
   policy_arn = aws_iam_policy.ddb_put[0].arn
 }
 
+resource "aws_iam_policy" "ddb_preorders_put" {
+  count  = var.enable_api && var.preorders_ddb_table != "" ? 1 : 0
+  name   = "${var.project}-ddb-preorders-put"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Action = ["dynamodb:PutItem"],
+      Resource = "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.preorders_ddb_table}"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ddb_preorders_attach" {
+  count      = var.enable_api && var.preorders_ddb_table != "" ? 1 : 0
+  role       = aws_iam_role.lambda_exec[0].name
+  policy_arn = aws_iam_policy.ddb_preorders_put[0].arn
+}
+
+resource "aws_iam_policy" "s3_read_site" {
+  count  = var.enable_api ? 1 : 0
+  name   = "${var.project}-s3-read-site"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect   = "Allow",
+      Action   = ["s3:GetObject"],
+      Resource = "${aws_s3_bucket.site.arn}/*"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "s3_read_attach" {
+  count      = var.enable_api ? 1 : 0
+  role       = aws_iam_role.lambda_exec[0].name
+  policy_arn = aws_iam_policy.s3_read_site[0].arn
+}
+
 resource "aws_lambda_function" "api" {
   count         = var.enable_api ? 1 : 0
   function_name = "${var.project}-subscribe-and-send"
@@ -248,13 +299,16 @@ resource "aws_lambda_function" "api" {
     variables = {
       SITE_URL                  = var.site_url
       FROM_EMAIL                = var.from_email
-      MAILCHIMP_API_KEY         = var.mailchimp_api_key
-      MAILCHIMP_SERVER_PREFIX   = var.mailchimp_server_prefix
-      MAILCHIMP_LIST_ID         = var.mailchimp_list_id
+      PREORDER_TO_EMAIL         = var.preorder_to_email
+      DDB_PREORDERS_TABLE       = var.preorders_ddb_table
       DDB_TABLE                 = var.ddb_table
       CORS_ORIGINS              = var.cors_origin
       SES_CONFIG_SET            = aws_sesv2_configuration_set.main[0].configuration_set_name
       LINK_SIGNING_SECRET       = var.link_signing_secret
+      TURNSTILE_SECRET_KEY      = var.turnstile_secret_key
+      EXCERPT_S3_BUCKET         = aws_s3_bucket.site.bucket
+      EXCERPT_FR_S3_KEY         = var.excerpt_fr_s3_key
+      EXCERPT_EN_S3_KEY         = var.excerpt_en_s3_key
     }
   }
 }
@@ -317,7 +371,7 @@ resource "null_resource" "build_lambda_ses_events" {
     src_hash = filesha256("../../aws/lambda/ses-events/index.mjs")
   }
   provisioner "local-exec" {
-    command = "cd ../../ && npm run -s build:lambda:ses-events"
+    command = "cd ../../ && npm ci && npm run -s build:lambda:ses-events"
   }
 }
 
