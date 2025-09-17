@@ -135,7 +135,7 @@ export const content = {
       contact: 'Contact',
       follow: 'Suivez-nous',
       email: 'contact@lafabriqueduleader.com',
-      address: 'Abidjan Angré, près du Programme 6 des Rosiers',
+      address: 'ANGRE, 8E TRANCHE EXTENSION SUD EST LOT 69-71 Abidjan; NA 001',
       byline: 'Un programme de Zonzerigué Leadership International',
       socials: [
         { kind: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/company/la-fabrique-du-leader' },
@@ -278,7 +278,7 @@ export const content = {
       contact: 'Contact',
       follow: 'Follow us',
       email: 'contact@lafabriqueduleader.com',
-      address: 'Abidjan Angré, near Programme 6 des Rosiers',
+      address: 'ANGRE, 8E TRANCHE EXTENSION SUD EST LOT 69-71 Abidjan; NA 001',
       byline: 'A program by Zonzerigué Leadership International',
       socials: [
         { kind: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/company/la-fabrique-du-leader' },

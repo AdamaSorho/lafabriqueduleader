@@ -210,8 +210,8 @@ export const handler = async (event) => {
       const oneClickUrl = `${siteUrl}/one-click-unsubscribe?e=${encodeURIComponent(email)}&sig=${sig}&lang=${encodeURIComponent(lang)}`
       const companyNameFr = 'Zonzerigué Leadership International'
       const companyNameEn = 'Zonzerigué Leadership International'
-      const addressFr = 'Abidjan Angré, près du Programme 6 des Rosiers'
-      const addressEn = 'Abidjan Angré, near Programme 6 des Rosiers'
+      const addressFr = 'ANGRE, 8E TRANCHE EXTENSION SUD EST LOT 69-71 Abidjan; NA 001'
+      const addressEn = 'ANGRE, 8E TRANCHE EXTENSION SUD EST LOT 69-71 Abidjan; NA 001'
       const privacyLink = lang === 'fr' ? `${siteUrl}/privacy.html` : `${siteUrl}/privacy-en.html`
       const termsLink = lang === 'fr' ? `${siteUrl}/terms.html` : `${siteUrl}/terms-en.html`
       const footerText = lang === 'fr'
