@@ -208,18 +208,30 @@ export const handler = async (event) => {
       const subject = lang === 'fr' ? 'Votre extrait — La Fabrique du Leader' : "Your excerpt — The Leader’s Inner Forge"
       const unsubUrl = `${siteUrl}/unsubscribe?e=${encodeURIComponent(email)}&sig=${sig}&lang=${encodeURIComponent(lang)}`
       const oneClickUrl = `${siteUrl}/one-click-unsubscribe?e=${encodeURIComponent(email)}&sig=${sig}&lang=${encodeURIComponent(lang)}`
+      const companyNameFr = 'Zonzerigué Leadership International'
+      const companyNameEn = 'Zonzerigué Leadership International'
+      const addressFr = 'Abidjan Angré, près du Programme 6 des Rosiers'
+      const addressEn = 'Abidjan Angré, near Programme 6 des Rosiers'
+      const privacyLink = lang === 'fr' ? `${siteUrl}/privacy.html` : `${siteUrl}/privacy-en.html`
+      const termsLink = lang === 'fr' ? `${siteUrl}/terms.html` : `${siteUrl}/terms-en.html`
+      const footerText = lang === 'fr'
+        ? `\n\n— ${companyNameFr}\n${addressFr}\nConfidentialité: ${privacyLink} | Mentions légales: ${termsLink}`
+        : `\n\n— ${companyNameEn}\n${addressEn}\nPrivacy: ${privacyLink} | Legal: ${termsLink}`
       const text = lang === 'fr'
-        ? `Bonjour,\n\nMerci pour votre intérêt. Téléchargez l’extrait ici : ${verifyPage}\n\nSi vous ne souhaitez plus recevoir d’emails liés au livre, désabonnez-vous ici : ${unsubUrl}\n\n— La Fabrique du Leader\n`
-        : `Hello,\n\nThanks for your interest. Download the excerpt here: ${verifyPage}\n\nIf you no longer wish to receive book-related emails, unsubscribe here: ${unsubUrl}\n\n— The Leader’s Inner Forge\n`
+        ? `Bonjour,\n\nMerci pour votre intérêt. Téléchargez l’extrait ici : ${verifyPage}\n\nSi vous ne souhaitez plus recevoir d’emails liés au livre, désabonnez-vous ici : ${unsubUrl}${footerText}\n`
+        : `Hello,\n\nThanks for your interest. Download the excerpt here: ${verifyPage}\n\nIf you no longer wish to receive book-related emails, unsubscribe here: ${unsubUrl}${footerText}\n`
+      const htmlFooter = lang === 'fr'
+        ? `<p style="color:#6b7280;font-size:12px;margin-top:24px">${companyNameFr} — ${addressFr}<br/>Confidentialité: <a href="${privacyLink}">voir la politique</a> · Mentions légales: <a href="${termsLink}">voir</a></p>`
+        : `<p style="color:#6b7280;font-size:12px;margin-top:24px">${companyNameEn} — ${addressEn}<br/>Privacy: <a href="${privacyLink}">view policy</a> · Legal: <a href="${termsLink}">view</a></p>`
       const html = lang === 'fr'
         ? `<p>Bonjour,</p>
            <p>Merci pour votre intérêt. Cliquez ici pour télécharger l’extrait : <a href="${verifyPage}">${verifyPage}</a></p>
            <p style="color:#6b7280;font-size:12px;margin-top:24px">Si vous ne souhaitez plus recevoir d’emails liés au livre, vous pouvez vous désabonner ici : <a href="${unsubUrl}">se désabonner</a>.</p>
-           <p>— La Fabrique du Leader</p>`
+           <p>— La Fabrique du Leader</p>${htmlFooter}`
         : `<p>Hello,</p>
            <p>Thanks for your interest. Click here to download the excerpt: <a href="${verifyPage}">${verifyPage}</a></p>
            <p style="color:#6b7280;font-size:12px;margin-top:24px">If you no longer wish to receive book‑related emails, you can unsubscribe here: <a href="${unsubUrl}">unsubscribe</a>.</p>
-           <p>— The Leader’s Inner Forge</p>`
+           <p>— The Leader’s Inner Forge</p>${htmlFooter}`
 
       // Send via SES (Raw to include List-Unsubscribe headers and multipart/alternative)
       const fromEmail = process.env.FROM_EMAIL

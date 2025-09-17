@@ -83,7 +83,8 @@ Unsubscribe
 - IAM permissions: Attach a policy allowing `ses:SendEmail` for your identity (and optionally `dynamodb:PutItem` if using DynamoDB).
 - Environment variables set in Terraform:
   - `SITE_URL` e.g. https://yourdomain.com
-  - `FROM_EMAIL` e.g. La Fabrique <no-reply@yourdomain.com>
+  - `FROM_EMAIL` e.g. Zonzerigué Leadership International <no-reply@yourdomain.com>
+    - Tip: use your legal org name as display name to match website/legal pages.
   - `PREORDER_TO_EMAIL` optional recipient for pre-order notifications
   - `LINK_SIGNING_SECRET` for signed download links
   - `TURNSTILE_SECRET_KEY` for server-side bot verification (Cloudflare Turnstile)
@@ -123,3 +124,31 @@ Excerpt files (private access)
   - `private/excerpts/excerpt-en.pdf`
 - Terraform passes these keys to the Lambda; the Lambda reads via s3:GetObject and returns the bytes. Files are not publicly exposed via CloudFront.
 - The frontend deploy excludes any `excerpt*.pdf` from upload to avoid public exposure.
+
+SES production access checklist (recommended)
+- Identity
+  - Verify your sending domain in SES (DNS): enable Easy DKIM, ensure SPF alignment, and publish a DMARC record (p=none or p=quarantine to start).
+  - Use a professional From like `Zonzerigué Leadership International <no-reply@lafabriqueduleader.com>`.
+- Website and policy links
+  - Public site shows a physical mailing address in the footer.
+  - Privacy Policy and Legal/Terms pages are published and linked (emails also link to them).
+- Consent and sending practices
+  - Only transactional emails triggered by explicit user action (excerpt delivery). Pre-orders notify the team only.
+  - Visible unsubscribe link and RFC 8058 one‑click headers included in every email.
+  - Bot protection (Cloudflare Turnstile), IP rate limiting, and 5‑minute resend guard.
+- Bounce/complaint handling
+  - SES configuration set with SNS destination (BOUNCE, COMPLAINT) → Lambda updates DynamoDB status.
+  - Suppress future sends to addresses marked bounced/complained/unsubscribed.
+- Verification flow
+  - Signed links and verification gate the PDF download to reduce fake or mistyped addresses.
+- Monitoring
+  - Track bounce/complaint rates and CloudWatch logs; warm up volume gradually.
+
+Template answers for SES production request
+- Use case: “Transactional emails only (excerpt delivery after user request; internal pre‑order notifications). No marketing campaigns or purchased lists.”
+- Recipient acquisition: “Collected exclusively through our website forms with Cloudflare Turnstile. We use signed verification links before delivering the PDF.”
+- Sample content: Provide the plain‑text excerpt email with the download link and unsubscribe URL.
+- Opt‑out: “Visible unsubscribe link and List‑Unsubscribe/One‑Click headers; unsubscribes persisted immediately in DynamoDB.”
+- Bounces/complaints: “SES → SNS → Lambda marks addresses as ‘bounced’/‘complained’ in DynamoDB; subsequent sends are suppressed.”
+- Identity & domain: “Domain is verified with Easy DKIM; SPF aligned; DMARC published; From uses our legal organization name.”
+- Volume: “Low and gradual, monitored closely (dozens/day initially).”

@@ -13,7 +13,7 @@ site_url    = "https://lafabriqueduleader.com"
 cors_origin = "https://lafabriqueduleader.com"
 
 # FROM address used by SES in Lambda (must be part of a verified SES identity)
-from_email = "La Fabrique <no-reply@lafabriqueduleader.com>"
+from_email = "Zonzerigué Leadership International <no-reply@lafabriqueduleader.com>"
 # Optional: where pre-order notifications are sent. If empty, FROM_EMAIL is used.
 preorder_to_email = "orders@lafabriqueduleader.com"
 
