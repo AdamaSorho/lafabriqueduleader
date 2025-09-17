@@ -6,6 +6,7 @@ export default function Footer({ strings, lang }) {
   const socials = strings.footer?.socials || []
   const privacyHref = lang === 'fr' ? '/privacy.html' : '/privacy-en.html'
   const termsHref = lang === 'fr' ? '/terms.html' : '/terms-en.html'
+  const brand = strings.footer?.brand || strings.hero?.brand || 'La Fabrique du Leader'
   const Icon = ({ kind }) => {
     const cls = 'size-4'
     switch (kind) {
@@ -29,8 +30,13 @@ export default function Footer({ strings, lang }) {
     <footer id="contact" className="border-t border-black/10 bg-white py-10">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 sm:flex-row sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
-          <img src={logo} alt="La Fabrique du Leader" className="h-6 w-auto" />
-          <span className="text-sm font-semibold">La Fabrique du Leader</span>
+          <img src={logo} alt={brand} className="h-6 w-auto" />
+          <div className="flex flex-col leading-tight">
+            <span className="text-sm font-semibold">{brand}</span>
+            {strings.footer?.byline && (
+              <span className="text-[11px] text-gray-500">{strings.footer.byline}</span>
+            )}
+          </div>
         </div>
         <div className="flex flex-col items-center gap-3 sm:flex-row">
           {(email || address) && (

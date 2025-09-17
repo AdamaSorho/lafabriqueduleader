@@ -136,6 +136,7 @@ export const content = {
       follow: 'Suivez-nous',
       email: 'contact@lafabriqueduleader.com',
       address: 'Abidjan Angré, près du Programme 6 des Rosiers',
+      byline: 'Un programme de Zonzerigué Leadership International',
       socials: [
         { kind: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/company/la-fabrique-du-leader' },
         // { kind: 'x', label: 'X', url: '#' },
@@ -278,6 +279,7 @@ export const content = {
       follow: 'Follow us',
       email: 'contact@lafabriqueduleader.com',
       address: 'Abidjan Angré, near Programme 6 des Rosiers',
+      byline: 'A program by Zonzerigué Leadership International',
       socials: [
         { kind: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/company/la-fabrique-du-leader' },
         // { kind: 'x', label: 'X', url: '#' },
