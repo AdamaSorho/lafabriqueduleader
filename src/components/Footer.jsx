@@ -2,6 +2,7 @@ import logo from '../assets/logo.png'
 
 export default function Footer({ strings, lang }) {
   const email = strings.footer?.email
+  const address = strings.footer?.address
   const socials = strings.footer?.socials || []
   const privacyHref = lang === 'fr' ? '/privacy.html' : '/privacy-en.html'
   const termsHref = lang === 'fr' ? '/terms.html' : '/terms-en.html'
@@ -32,8 +33,15 @@ export default function Footer({ strings, lang }) {
           <span className="text-sm font-semibold">La Fabrique du Leader</span>
         </div>
         <div className="flex flex-col items-center gap-3 sm:flex-row">
-          {email && (
-            <a href={`mailto:${email}`} className="text-xs text-gray-700 hover:text-black">{email}</a>
+          {(email || address) && (
+            <div className="flex flex-col items-center sm:items-start">
+              {email && (
+                <a href={`mailto:${email}`} className="text-xs text-gray-700 hover:text-black">{email}</a>
+              )}
+              {address && (
+                <div className="text-xs text-gray-700">{address}</div>
+              )}
+            </div>
           )}
           {socials.length > 0 && (
             <div className="flex items-center gap-3">
@@ -58,4 +66,3 @@ export default function Footer({ strings, lang }) {
     </footer>
   )
 }
-
