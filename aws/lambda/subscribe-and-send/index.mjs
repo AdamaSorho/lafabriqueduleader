@@ -215,8 +215,8 @@ export const handler = async (event) => {
       const privacyLink = lang === 'fr' ? `${siteUrl}/privacy.html` : `${siteUrl}/privacy-en.html`
       const termsLink = lang === 'fr' ? `${siteUrl}/terms.html` : `${siteUrl}/terms-en.html`
       const footerText = lang === 'fr'
-        ? `\n\n— ${companyNameFr}\n${addressFr}\nConfidentialité: ${privacyLink} | Mentions légales: ${termsLink}`
-        : `\n\n— ${companyNameEn}\n${addressEn}\nPrivacy: ${privacyLink} | Legal: ${termsLink}`
+        ? `\n\n— ${companyNameFr}\n${addressFr}\nTél.: +225.0758260000\nConfidentialité: ${privacyLink} | Mentions légales: ${termsLink}`
+        : `\n\n— ${companyNameEn}\n${addressEn}\nPhone: +225.0758260000\nPrivacy: ${privacyLink} | Legal: ${termsLink}`
       const text = lang === 'fr'
         ? `Bonjour,\n\nMerci pour votre intérêt. Téléchargez l’extrait ici : ${verifyPage}\n\nSi vous ne souhaitez plus recevoir d’emails liés au livre, désabonnez-vous ici : ${unsubUrl}${footerText}\n`
         : `Hello,\n\nThanks for your interest. Download the excerpt here: ${verifyPage}\n\nIf you no longer wish to receive book-related emails, unsubscribe here: ${unsubUrl}${footerText}\n`
@@ -227,11 +227,13 @@ export const handler = async (event) => {
         ? `<p>Bonjour,</p>
            <p>Merci pour votre intérêt. Cliquez ici pour télécharger l’extrait : <a href="${verifyPage}">${verifyPage}</a></p>
            <p style="color:#6b7280;font-size:12px;margin-top:24px">Si vous ne souhaitez plus recevoir d’emails liés au livre, vous pouvez vous désabonner ici : <a href="${unsubUrl}">se désabonner</a>.</p>
-           <p>— La Fabrique du Leader</p>${htmlFooter}`
+           <p>— La Fabrique du Leader</p>
+           <p style="color:#6b7280;font-size:12px;margin-top:12px">${companyNameFr} — ${addressFr}<br/>Tél.: <a href="tel:+2250758260000">+225.0758260000</a><br/>Confidentialité: <a href="${privacyLink}">voir la politique</a> · Mentions légales: <a href="${termsLink}">voir</a></p>`
         : `<p>Hello,</p>
            <p>Thanks for your interest. Click here to download the excerpt: <a href="${verifyPage}">${verifyPage}</a></p>
            <p style="color:#6b7280;font-size:12px;margin-top:24px">If you no longer wish to receive book‑related emails, you can unsubscribe here: <a href="${unsubUrl}">unsubscribe</a>.</p>
-           <p>— The Leader’s Inner Forge</p>${htmlFooter}`
+           <p>— The Leader’s Inner Forge</p>
+           <p style="color:#6b7280;font-size:12px;margin-top:12px">${companyNameEn} — ${addressEn}<br/>Phone: <a href="tel:+2250758260000">+225.0758260000</a><br/>Privacy: <a href="${privacyLink}">view policy</a> · Legal: <a href="${termsLink}">view</a></p>`
 
       // Send via SES (Raw to include List-Unsubscribe headers and multipart/alternative)
       const fromEmail = process.env.FROM_EMAIL

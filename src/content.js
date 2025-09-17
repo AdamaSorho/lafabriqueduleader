@@ -137,6 +137,7 @@ export const content = {
       email: 'contact@lafabriqueduleader.com',
       address: 'ANGRE, 8E TRANCHE EXTENSION SUD EST LOT 69-71 Abidjan; NA 001',
       byline: 'Un programme de Zonzerigué Leadership International',
+      phone: '+225.0758260000',
       socials: [
         { kind: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/company/la-fabrique-du-leader' },
         // { kind: 'x', label: 'X', url: '#' },
@@ -280,6 +281,7 @@ export const content = {
       email: 'contact@lafabriqueduleader.com',
       address: 'ANGRE, 8E TRANCHE EXTENSION SUD EST LOT 69-71 Abidjan; NA 001',
       byline: 'A program by Zonzerigué Leadership International',
+      phone: '+225.0758260000',
       socials: [
         { kind: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/company/la-fabrique-du-leader' },
         // { kind: 'x', label: 'X', url: '#' },

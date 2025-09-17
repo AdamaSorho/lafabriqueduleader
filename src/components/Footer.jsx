@@ -3,6 +3,7 @@ import logo from '../assets/logo.png'
 export default function Footer({ strings, lang }) {
   const email = strings.footer?.email
   const address = strings.footer?.address
+  const phone = strings.footer?.phone
   const socials = strings.footer?.socials || []
   const privacyHref = lang === 'fr' ? '/privacy.html' : '/privacy-en.html'
   const termsHref = lang === 'fr' ? '/terms.html' : '/terms-en.html'
@@ -39,13 +40,21 @@ export default function Footer({ strings, lang }) {
           </div>
         </div>
         <div className="flex flex-col items-center gap-3 sm:flex-row">
-          {(email || address) && (
+          {(email || address || phone) && (
             <div className="flex flex-col items-center sm:items-start">
               {email && (
                 <a href={`mailto:${email}`} className="text-xs text-gray-700 hover:text-black">{email}</a>
               )}
               {address && (
                 <div className="text-xs text-gray-700">{address}</div>
+              )}
+              {phone && (
+                <a
+                  href={`tel:${String(phone).replace(/[^+0-9]/g,'')}`}
+                  className="text-xs text-gray-700 hover:text-black"
+                >
+                  {phone}
+                </a>
               )}
             </div>
           )}
