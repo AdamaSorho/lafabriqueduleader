@@ -135,7 +135,7 @@ export const content = {
       contact: 'Contact',
       follow: 'Suivez-nous',
       email: 'contact@zonzerigueleadership.com',
-      byline: 'Un programme de Zonzerigué Leadership International',
+      byline: 'Un programme de Zonzerigué Leadership International (ZLI)',
       socials: [
         { kind: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/company/la-fabrique-du-leader' },
         // { kind: 'x', label: 'X', url: '#' },
@@ -277,7 +277,7 @@ export const content = {
       contact: 'Contact',
       follow: 'Follow us',
       email: 'contact@zonzerigueleadership.com',
-      byline: 'A program by Zonzerigué Leadership International',
+      byline: 'A program by Zonzerigué Leadership International (ZLI)',
       socials: [
         { kind: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/company/la-fabrique-du-leader' },
         // { kind: 'x', label: 'X', url: '#' },
