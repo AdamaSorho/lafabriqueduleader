@@ -15,9 +15,8 @@ export default function Contact({ lang }) {
       </div>
       <div className="flex items-center gap-3">
         <button type="submit" className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-black/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20">{lang === 'fr' ? 'Envoyer' : 'Send'}</button>
-        <a href="mailto:contact@lafabriqueduleader.com" className="text-sm text-gray-600 hover:text-gray-900">{lang === 'fr' ? 'ou nous écrire directement' : 'or write to us directly'}</a>
+        <a href="mailto:contact@zonzerigueleadership.com" className="text-sm text-gray-600 hover:text-gray-900">{lang === 'fr' ? 'ou nous écrire directement' : 'or write to us directly'}</a>
       </div>
     </form>
   )
 }
-

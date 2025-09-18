@@ -33,7 +33,7 @@ export default function PreorderModal({ open, onClose, lang }) {
         setName(''); setEmail(''); setPhone(''); setFormat('print'); setQuantity(1); setCountry(''); setNotes('')
       } else {
         const txt = await res.text().catch(()=> '')
-        setStatus('error'); setMessage(t('Une erreur est survenue. Réessayez ou écrivez-nous: contact@lafabriqueduleader.com.', 'Something went wrong. Try again or email us: contact@lafabriqueduleader.com.') + (txt? ' '+txt: ''))
+        setStatus('error'); setMessage(t('Une erreur est survenue. Réessayez ou écrivez-nous: contact@zonzerigueleadership.com.', 'Something went wrong. Try again or email us: contact@zonzerigueleadership.com.') + (txt? ' '+txt: ''))
       }
     } catch (err) {
       console.error(err); setStatus('error'); setMessage(t('Réseau indisponible. Réessayez plus tard ou contactez-nous.','Network unavailable. Please try later or contact us.'))
@@ -90,4 +90,3 @@ export default function PreorderModal({ open, onClose, lang }) {
     </div>
   )
 }
-

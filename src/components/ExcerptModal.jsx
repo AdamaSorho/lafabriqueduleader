@@ -26,7 +26,7 @@ export default function ExcerptModal({ open, onClose, lang }) {
       } else {
         const txt = await res.text().catch(() => '')
         setStatus('error')
-        setMessage(t(`Une erreur est survenue. Réessayez ou écrivez-nous: contact@lafabriqueduleader.com. ${txt}`, `Something went wrong. Try again or email us: contact@lafabriqueduleader.com. ${txt}`))
+        setMessage(t(`Une erreur est survenue. Réessayez ou écrivez-nous: contact@zonzerigueleadership.com. ${txt}`, `Something went wrong. Try again or email us: contact@zonzerigueleadership.com. ${txt}`))
       }
     } catch (err) {
       console.error(err)
@@ -53,4 +53,3 @@ export default function ExcerptModal({ open, onClose, lang }) {
     </div>
   )
 }
-
