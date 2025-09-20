@@ -7,13 +7,17 @@ region  = "us-east-1"
 site_bucket_name = "<your-unique-s3-bucket-name>"
 
 # Public site URL used inside emails and for CORS
-# If you do NOT have a custom domain yet, you can temporarily set this later
-# to the CloudFront domain output (e.g., https://dxxxxx.cloudfront.net).
-site_url    = "https://lafabriqueduleader.com"
-cors_origin = "https://lafabriqueduleader.com"
+site_url    = "http://<your-bucket>.s3-website-<region>.amazonaws.com"
+cors_origin = "http://<your-bucket>.s3-website-<region>.amazonaws.com"
 
-# FROM address used by SES in Lambda (must be part of a verified SES identity)
+# FROM address used in emails (display name + address)
 from_email = "Zonzerigué Leadership International <no-reply@lafabriqueduleader.com>"
+# Google SMTP (use App Password on Gmail/Workspace)
+smtp_host = "smtp.gmail.com"
+smtp_port = 465
+smtp_user = "no-reply@lafabriqueduleader.com"
+smtp_pass = "<app-password>"
+
 # Optional: where pre-order notifications are sent. If empty, FROM_EMAIL is used.
 preorder_to_email = "orders@lafabriqueduleader.com"
 
@@ -37,11 +41,5 @@ preorders_ddb_table = "book_preorders"
 excerpt_fr_s3_key = "private/excerpts/excerpt-fr.pdf"
 excerpt_en_s3_key = "private/excerpts/excerpt-en.pdf"
 
-# Optional: CloudFront custom domain. If you want to serve via your domain,
-# set aliases and ACM certificate ARN (in us-east-1) for those names.
-# If not using a custom domain yet, leave aliases empty and acm_certificate_arn "".
-aliases            = [
-  # "lafabriqueduleader.com",
-  # "www.lafabriqueduleader.com",
-]
-acm_certificate_arn = ""
+# Note: With S3 website hosting, HTTPS on a custom domain requires CloudFront,
+# which is not used in this configuration.

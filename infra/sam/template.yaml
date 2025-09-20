@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Subscribe-and-send API with SES (and optional Mailchimp/DynamoDB)
+Description: Subscribe-and-send API with SMTP email and optional DynamoDB
 
 Globals:
   Function:
@@ -79,4 +79,3 @@ Resources:
 Outputs:
   ApiBaseUrl:
     Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com
-

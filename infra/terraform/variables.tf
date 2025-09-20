@@ -11,27 +11,33 @@ variable "site_bucket_name" {
   type = string 
   description = "S3 bucket name for static site" 
 }
-variable "acm_certificate_arn" { 
-  type = string
-  default = ""
-  description = "Optional ACM cert ARN in us-east-1 for custom domain" 
-  validation {
-    condition     = length(var.aliases) == 0 || var.acm_certificate_arn != ""
-    error_message = "When providing CloudFront aliases, you must set a valid us-east-1 ACM certificate ARN in acm_certificate_arn."
-  }
-}
-variable "aliases" { 
-  type = list(string)
-  default = []
-  description = "Optional CloudFront aliases (custom domains), e.g. ['lafabriqueduleader.com','www.lafabriqueduleader.com']" 
-}
 variable "site_url" { 
   type = string
-  description = "Public site URL used inside emails (https://domain)" 
+  description = "Public site URL used inside emails (e.g., https://domain or http://<bucket>.s3-website-<region>.amazonaws.com)" 
 }
 variable "from_email" { 
   type = string
-  description = "Verified SES from address, e.g., 'La Fabrique <no-reply@domain.com>'" 
+  description = "From address used for emails, e.g., 'La Fabrique <no-reply@domain.com>'" 
+}
+variable "smtp_host" {
+  type        = string
+  default     = "smtp.gmail.com"
+  description = "SMTP host (e.g., smtp.gmail.com)"
+}
+variable "smtp_port" {
+  type        = number
+  default     = 465
+  description = "SMTP port (465 for SSL, 587 for STARTTLS)"
+}
+variable "smtp_user" {
+  type        = string
+  default     = ""
+  description = "SMTP username (full email for Gmail/Workspace; use App Password)"
+}
+variable "smtp_pass" {
+  type        = string
+  default     = ""
+  description = "SMTP password or App Password"
 }
 variable "preorder_to_email" {
   type        = string
@@ -40,7 +46,7 @@ variable "preorder_to_email" {
 }
 variable "cors_origin" { 
   type = string
-  description = "Allowed CORS origin for API (e.g., https://domain)" 
+  description = "Allowed CORS origin for API (e.g., https://domain or the S3 website endpoint)" 
 }
 
 variable "link_signing_secret" {
@@ -54,6 +60,7 @@ variable "turnstile_secret_key" {
   default     = ""
   description = "Cloudflare Turnstile secret key for server-side verification."
 }
+
 
 variable "excerpt_fr_s3_key" {
   type        = string
@@ -83,4 +90,11 @@ variable "preorders_ddb_table" {
 variable "enable_api" { 
   type = bool
   default = false 
+}
+
+# TTL (seconds) for temporary rate-limit IP records stored in DynamoDB
+variable "rate_ttl_secs" {
+  type        = number
+  default     = 3600
+  description = "TTL in seconds for ip#<addr> throttle records in DynamoDB. Only applied to those items."
 }

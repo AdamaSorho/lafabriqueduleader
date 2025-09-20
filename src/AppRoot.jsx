@@ -138,6 +138,7 @@ export default function AppRoot() {
       <BookPreviewModal
         open={bookPreviewOpen}
         onClose={() => setBookPreviewOpen(false)}
+        lang={lang}
       />
       <PreorderModal
         open={preorderOpen}

@@ -1,9 +1,9 @@
-.PHONY: help deploy deploy-skip-build deploy-dry-run deploy-skip-build-dry-run report
+.PHONY: help deploy deploy-skip-build deploy-dry-run deploy-skip-build-dry-run infra-apply redeploy report
 
 # Load local overrides (not committed). Create .make.local to set defaults:
 #   PROFILE=TerraformMindapax
 #   SITE_BUCKET=your-bucket
-#   CLOUDFRONT_DOMAIN=dxxxx.cloudfront.net (or your CNAME)
+#   (no CloudFront needed)
 -include .make.local
 
 # Usage examples:
@@ -15,32 +15,42 @@
 # Variables you can pass:
 #   PROFILE                -> sets AWS_PROFILE for the script (optional)
 #   SITE_BUCKET            -> overrides S3 bucket (optional)
-#   CLOUDFRONT_DOMAIN      -> CloudFront domain or custom CNAME (optional)
 #   ARGS                   -> extra flags, e.g. "--skip-build --dry-run"
 
 help:
 	@echo "Targets:"
-	@echo "  make deploy [PROFILE=...] [SITE_BUCKET=...] [CLOUDFRONT_DOMAIN=...] [ARGS='--skip-build']"
-	@echo "  make deploy-skip-build [PROFILE=...] [SITE_BUCKET=...] [CLOUDFRONT_DOMAIN=...]"
-	@echo "  make deploy-dry-run [PROFILE=...] [SITE_BUCKET=...] [CLOUDFRONT_DOMAIN=...]"
+	@echo "  make deploy [PROFILE=...] [SITE_BUCKET=...] [ARGS='--skip-build']"
+	@echo "  make deploy-skip-build [PROFILE=...] [SITE_BUCKET=...]"
+	@echo "  make deploy-dry-run [PROFILE=...] [SITE_BUCKET=...]"
+	@echo "  make infra-apply [PROFILE=...]   # terraform init/apply for infra"
+	@echo "  make redeploy [PROFILE=...] [SITE_BUCKET=...]  # infra apply + deploy-skip-build"
 	@echo "  make report [PROFILE=...] [TABLE=newsletter_signups] [HOURS=72 | SINCE=ISO] [REGION=us-east-1]"
 	@echo
-	@echo "Variables: PROFILE, SITE_BUCKET, CLOUDFRONT_DOMAIN, ARGS (or set them in .make.local)"
+	@echo "Variables: PROFILE, SITE_BUCKET, ARGS (or set them in .make.local)"
 
 deploy:
 	@AWS_PROFILE=$(PROFILE) \
 	SITE_BUCKET=$(SITE_BUCKET) \
-	CLOUDFRONT_DOMAIN=$(CLOUDFRONT_DOMAIN) \
 	scripts/deploy-frontend.sh $(ARGS)
 
 deploy-skip-build:
-	@$(MAKE) deploy ARGS="--skip-build" PROFILE=$(PROFILE) SITE_BUCKET=$(SITE_BUCKET) CLOUDFRONT_DOMAIN=$(CLOUDFRONT_DOMAIN)
+	@$(MAKE) deploy ARGS="--skip-build" PROFILE=$(PROFILE) SITE_BUCKET=$(SITE_BUCKET)
 
 deploy-dry-run:
-	@$(MAKE) deploy ARGS="--dry-run" PROFILE=$(PROFILE) SITE_BUCKET=$(SITE_BUCKET) CLOUDFRONT_DOMAIN=$(CLOUDFRONT_DOMAIN)
+	@$(MAKE) deploy ARGS="--dry-run" PROFILE=$(PROFILE) SITE_BUCKET=$(SITE_BUCKET)
 
 deploy-skip-build-dry-run:
-	@$(MAKE) deploy ARGS="--skip-build --dry-run" PROFILE=$(PROFILE) SITE_BUCKET=$(SITE_BUCKET) CLOUDFRONT_DOMAIN=$(CLOUDFRONT_DOMAIN)
+	@$(MAKE) deploy ARGS="--skip-build --dry-run" PROFILE=$(PROFILE) SITE_BUCKET=$(SITE_BUCKET)
+
+# Terraform init/apply for infra
+infra-apply:
+	@cd infra/terraform && AWS_PROFILE=$(PROFILE) terraform init -upgrade
+	@AWS_PROFILE=$(PROFILE) terraform -chdir=infra/terraform apply -auto-approve
+
+# Apply infra changes then deploy frontend (skip build for speed)
+redeploy:
+	@$(MAKE) infra-apply PROFILE=$(PROFILE)
+	@AWS_PROFILE=$(PROFILE) SITE_BUCKET= scripts/deploy-frontend.sh --skip-build
 
 # Summarize recent signup records from DynamoDB
 # Examples:

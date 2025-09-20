@@ -1,6 +1,6 @@
 // Quick local sanity check for the bundled Lambda (no AWS calls)
 // - Verifies the GET /verify-excerpt path signature + redirect logic
-// - Does NOT exercise the POST/SES flow
+// - Does NOT exercise the POST email flow
 
 import crypto from 'node:crypto'
 import path from 'node:path'
@@ -35,4 +35,3 @@ await runCase('valid-signature', email, sig)
 await runCase('invalid-signature', email, 'deadbeef')
 
 console.log('\n✔ Bundle importable and handler executed.')
-

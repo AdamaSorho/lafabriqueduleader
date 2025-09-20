@@ -1,12 +1,22 @@
 // Lambda handler for AWS API Gateway HTTP API
-// Sends excerpt link via Amazon SES, optionally subscribes to Mailchimp, and can store to DynamoDB (optional)
+// Sends excerpt link via SMTP (Gmail/Workspace), optionally stores to DynamoDB, and supports preorders
 
-import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2'
+import nodemailer from 'nodemailer'
 import { DynamoDBClient, PutItemCommand, UpdateItemCommand, GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import crypto from 'crypto'
 
-const ses = new SESv2Client({})
+let smtpTransport
+function getTransport() {
+  if (smtpTransport) return smtpTransport
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com'
+  const port = Number(process.env.SMTP_PORT || 465)
+  const user = process.env.SMTP_USER || ''
+  const pass = process.env.SMTP_PASS || ''
+  const secure = port === 465
+  smtpTransport = nodemailer.createTransport({ host, port, secure, auth: { user, pass } })
+  return smtpTransport
+}
 const ddb = new DynamoDBClient({})
 const s3 = new S3Client({})
 
@@ -49,6 +59,7 @@ export const handler = async (event) => {
       return s === 'bounced' || s === 'complained' || s === 'unsubscribed'
     }
     const WINDOW_MS = 5 * 60 * 1000
+    const RATE_TTL_SECS = Number(process.env.RATE_TTL_SECS || 3600)
     const IP_LIMIT = 10 // max requests per IP per window
 
     async function rateLimitIp(ip) {
@@ -57,6 +68,7 @@ export const handler = async (event) => {
       if (!table) return true
       const key = { email: { S: `ip#${ip}` } }
       const now = Date.now()
+      const ttl = Math.floor(now / 1000) + RATE_TTL_SECS
       const existing = await ddb.send(new GetItemCommand({ TableName: table, Key: key })).catch(() => ({}))
       const item = existing?.Item
       const last = item ? getLastTs(item) : 0
@@ -66,15 +78,15 @@ export const handler = async (event) => {
         await ddb.send(new UpdateItemCommand({
           TableName: table,
           Key: key,
-          UpdateExpression: 'SET count = :c, updatedAt = :t',
-          ExpressionAttributeValues: { ':c': { N: String(count) }, ':t': { N: String(now) } },
+          UpdateExpression: 'SET count = :c, updatedAt = :t, ttl = :ttl',
+          ExpressionAttributeValues: { ':c': { N: String(count) }, ':t': { N: String(now) }, ':ttl': { N: String(ttl) } },
         }))
         return true
       }
       // reset window
       await ddb.send(new PutItemCommand({
         TableName: table,
-        Item: { email: { S: `ip#${ip}` }, count: { N: '1' }, ts: { N: String(now) } },
+        Item: { email: { S: `ip#${ip}` }, count: { N: '1' }, ts: { N: String(now) }, ttl: { N: String(ttl) } },
       }))
       return true
     }
@@ -131,7 +143,7 @@ export const handler = async (event) => {
       if (!fromEmail || !toEmail) throw new Error('FROM_EMAIL (and optionally PREORDER_TO_EMAIL) must be set')
 
       const subject = lang === 'fr' ? 'Nouvelle précommande — La Fabrique du Leader' : 'New pre-order — The Leader’s Inner Forge'
-      const esc = (s='') => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       const html = `
         <h3>${esc(subject)}</h3>
         <p><strong>Nom</strong>: ${esc(name)}</p>
@@ -144,15 +156,14 @@ export const handler = async (event) => {
         <p><strong>Langue</strong>: ${esc(lang)}</p>
       `
 
-      const params = {
-        FromEmailAddress: fromEmail,
-        Destination: { ToAddresses: [toEmail] },
-        ReplyToAddresses: [email],
-        Content: { Simple: { Subject: { Data: subject }, Body: { Html: { Data: html } } } },
-      }
-      const configSet = process.env.SES_CONFIG_SET
-      if (configSet) params.ConfigurationSetName = configSet
-      await ses.send(new SendEmailCommand(params))
+      const transporter = getTransport()
+      await transporter.sendMail({
+        from: fromEmail,
+        to: toEmail,
+        subject,
+        html,
+        replyTo: email
+      })
 
       // Store in DynamoDB (optional). Prefer a dedicated preorders table when available.
       const ddbTable = process.env.DDB_PREORDERS_TABLE || process.env.DDB_TABLE
@@ -210,6 +221,8 @@ export const handler = async (event) => {
       const oneClickUrl = `${siteUrl}/one-click-unsubscribe?e=${encodeURIComponent(email)}&sig=${sig}&lang=${encodeURIComponent(lang)}`
       const companyNameFr = 'Zonzerigué Leadership International'
       const companyNameEn = 'Zonzerigué Leadership International'
+      const addressFr = process.env.COMPANY_ADDRESS_FR || ''
+      const addressEn = process.env.COMPANY_ADDRESS_EN || ''
       const privacyLink = lang === 'fr' ? `${siteUrl}/privacy.html` : `${siteUrl}/privacy-en.html`
       const termsLink = lang === 'fr' ? `${siteUrl}/terms.html` : `${siteUrl}/terms-en.html`
       const footerText = lang === 'fr'
@@ -218,9 +231,7 @@ export const handler = async (event) => {
       const text = lang === 'fr'
         ? `Bonjour,\n\nMerci pour votre intérêt. Téléchargez l’extrait ici : ${verifyPage}\n\nSi vous ne souhaitez plus recevoir d’emails liés au livre, désabonnez-vous ici : ${unsubUrl}${footerText}\n`
         : `Hello,\n\nThanks for your interest. Download the excerpt here: ${verifyPage}\n\nIf you no longer wish to receive book-related emails, unsubscribe here: ${unsubUrl}${footerText}\n`
-      const htmlFooter = lang === 'fr'
-        ? `<p style="color:#6b7280;font-size:12px;margin-top:24px">${companyNameFr} — ${addressFr}<br/>Confidentialité: <a href="${privacyLink}">voir la politique</a> · Mentions légales: <a href="${termsLink}">voir</a></p>`
-        : `<p style="color:#6b7280;font-size:12px;margin-top:24px">${companyNameEn} — ${addressEn}<br/>Privacy: <a href="${privacyLink}">view policy</a> · Legal: <a href="${termsLink}">view</a></p>`
+      // No physical address in footer; keep privacy/terms links only
       const html = lang === 'fr'
         ? `<p>Bonjour,</p>
            <p>Merci pour votre intérêt. Cliquez ici pour télécharger l’extrait : <a href="${verifyPage}">${verifyPage}</a></p>
@@ -233,39 +244,22 @@ export const handler = async (event) => {
            <p>— The Leader’s Inner Forge</p>
            <p style="color:#6b7280;font-size:12px;margin-top:12px">${companyNameEn}<br/>Privacy: <a href="${privacyLink}">view policy</a> · Legal: <a href="${termsLink}">view</a></p>`
 
-      // Send via SES (Raw to include List-Unsubscribe headers and multipart/alternative)
+      // Send via SMTP (Gmail / Google Workspace)
       const fromEmail = process.env.FROM_EMAIL
       if (!fromEmail) throw new Error('FROM_EMAIL not set')
       const to = email
-      const boundary = 'b-' + crypto.randomUUID()
-      const mime = [
-        `From: ${fromEmail}`,
-        `To: ${to}`,
-        `Subject: ${subject}`,
-        'MIME-Version: 1.0',
-        `Content-Type: multipart/alternative; boundary="${boundary}"`,
-        `List-Unsubscribe: <${unsubUrl}>`,
-        `List-Unsubscribe-Post: List-Unsubscribe=One-Click`,
-        '',
-        `--${boundary}`,
-        'Content-Type: text/plain; charset=UTF-8',
-        '',
+      const transporter = getTransport()
+      await transporter.sendMail({
+        from: fromEmail,
+        to,
+        subject,
         text,
-        `--${boundary}`,
-        'Content-Type: text/html; charset=UTF-8',
-        '',
         html,
-        `--${boundary}--`,
-        '',
-      ].join('\r\n')
-      const params = {
-        Destination: { ToAddresses: [to] },
-        Content: { Raw: { Data: new TextEncoder().encode(mime) } },
-        FromEmailAddress: fromEmail,
-      }
-      const configSet = process.env.SES_CONFIG_SET
-      if (configSet) params.ConfigurationSetName = configSet
-      await ses.send(new SendEmailCommand(params))
+        headers: {
+          'List-Unsubscribe': `<${unsubUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
+        }
+      })
 
       // Store in DynamoDB with pending status
       if (process.env.DDB_TABLE) {
@@ -349,7 +343,7 @@ export const handler = async (event) => {
             email = email || u.get('e') || u.get('email') || ''
             sig = sig || u.get('sig') || ''
           }
-        } catch {}
+        } catch { }
       }
       const secret = process.env.LINK_SIGNING_SECRET || ''
       if (!secret) throw new Error('LINK_SIGNING_SECRET not set')
@@ -383,7 +377,7 @@ export const handler = async (event) => {
             email = email || u.get('e') || u.get('email') || ''
             sig = sig || u.get('sig') || ''
           }
-        } catch {}
+        } catch { }
       }
       const secret = process.env.LINK_SIGNING_SECRET || ''
       if (!secret) throw new Error('LINK_SIGNING_SECRET not set')
