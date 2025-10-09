@@ -44,6 +44,24 @@ variable "preorder_to_email" {
   default     = ""
   description = "Recipient address for pre-order notifications. Defaults to from_email when empty."
 }
+
+variable "keynote_to_email" {
+  type        = string
+  default     = ""
+  description = "Recipient address for keynote requests. Falls back to leads_to_email or from_email."
+}
+
+variable "coaching_to_email" {
+  type        = string
+  default     = ""
+  description = "Recipient address for coaching applications. Falls back to leads_to_email or from_email."
+}
+
+variable "leads_to_email" {
+  type        = string
+  default     = ""
+  description = "Optional shared inbox for all lead forms (keynote/coaching)."
+}
 variable "cors_origin" { 
   type = string
   description = "Allowed CORS origin for API (e.g., https://domain or the S3 website endpoint)" 

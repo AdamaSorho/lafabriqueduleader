@@ -249,6 +249,9 @@ resource "aws_lambda_function" "api" {
       SMTP_USER                 = var.smtp_user
       SMTP_PASS                 = var.smtp_pass
       PREORDER_TO_EMAIL         = var.preorder_to_email
+      KEYNOTE_TO_EMAIL          = var.keynote_to_email
+      COACHING_TO_EMAIL         = var.coaching_to_email
+      LEADS_TO_EMAIL            = var.leads_to_email
       DDB_PREORDERS_TABLE       = var.preorders_ddb_table
       DDB_TABLE                 = var.ddb_table
       CORS_ORIGINS              = var.cors_origin

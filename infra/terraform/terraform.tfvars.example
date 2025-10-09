@@ -20,6 +20,11 @@ smtp_pass = "<app-password>"
 
 # Optional: where pre-order notifications are sent. If empty, FROM_EMAIL is used.
 preorder_to_email = "orders@lafabriqueduleader.com"
+# Optional: dedicated inboxes for keynote/coaching leads. If empty, falls back to leads_to_email or from_email.
+keynote_to_email = "keynotes@lafabriqueduleader.com"
+coaching_to_email = "coaching@lafabriqueduleader.com"
+# Shared fallback for lead forms (keynote + coaching). Leave blank to use from_email.
+leads_to_email = "leads@lafabriqueduleader.com"
 
 # Enable the API (API Gateway + Lambda). Required for the excerpt email flow.
 enable_api = true
