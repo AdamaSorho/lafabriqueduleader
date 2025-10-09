@@ -253,6 +253,7 @@ resource "aws_lambda_function" "api" {
       DDB_TABLE                 = var.ddb_table
       CORS_ORIGINS              = var.cors_origin
       LINK_SIGNING_SECRET       = var.link_signing_secret
+      API_SHARED_SECRET         = var.api_shared_secret
       TURNSTILE_SECRET_KEY      = var.turnstile_secret_key
       RATE_TTL_SECS             = tostring(var.rate_ttl_secs)
       EXCERPT_S3_BUCKET         = aws_s3_bucket.site.bucket

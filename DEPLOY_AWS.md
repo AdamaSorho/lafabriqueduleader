@@ -87,9 +87,15 @@ Unsubscribe
     - `DDB_TABLE` (excerpt signups)
     - `DDB_PREORDERS_TABLE` (pre-orders)
 
-5) Lambda Function URL (simpler/cheaper than API Gateway)
-- In Terraform, we provision a Function URL with CORS to your site and public auth (NONE).
-- Copy the Function URL output (looks like `https://xxxx.lambda-url.us-east-1.on.aws`).
+5) API access (recommend: Cloudflare Worker proxy)
+- The Lambda Function URL is public by default. For stronger protection:
+  - Set `api_shared_secret` in `infra/terraform/terraform.tfvars` (long random string) and `make infra-apply`.
+  - Deploy `cloudflare/worker-proxy.js` as a Cloudflare Worker with two secrets:
+    - `API_SHARED_SECRET` (same value)
+    - `UPSTREAM_URL` = your Function URL (e.g., `https://xxxx.lambda-url.us-east-1.on.aws`)
+  - Route `https://lafabriqueduleader.com/api/*` to the Worker.
+  - Set the frontend `VITE_API_BASE=https://lafabriqueduleader.com/api` and redeploy the site.
+- The Worker signs POST requests (subscribe and preorder) with an HMAC header; the Lambda verifies it. GET verify/unsubscribe remain public.
 
 6) Frontend configuration
 - Set `VITE_API_BASE` to your Function URL. Example: `VITE_API_BASE=https://xxxx.lambda-url.us-east-1.on.aws`.

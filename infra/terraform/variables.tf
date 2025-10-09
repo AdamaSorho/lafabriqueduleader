@@ -55,6 +55,12 @@ variable "link_signing_secret" {
   description = "Secret used to sign excerpt verification links (HMAC). Set to a long random string."
 }
 
+variable "api_shared_secret" {
+  type        = string
+  default     = ""
+  description = "Shared secret for securing POST API calls via HMAC (used by edge proxy/Worker). Leave empty to disable check."
+}
+
 variable "turnstile_secret_key" {
   type        = string
   default     = ""

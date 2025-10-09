@@ -27,6 +27,9 @@ enable_api = true
 # Secret used to sign verification links (use a long random string)
 link_signing_secret = "<generate-a-long-random-string>"
 
+# Optional: secure POST API with HMAC from a Cloudflare Worker proxy
+api_shared_secret = "<generate-another-long-random-string>"
+
 # Optional: Cloudflare Turnstile secret key for bot protection
 turnstile_secret_key = "<turnstile-secret-key>"
 
@@ -41,5 +44,5 @@ preorders_ddb_table = "book_preorders"
 excerpt_fr_s3_key = "private/excerpts/excerpt-fr.pdf"
 excerpt_en_s3_key = "private/excerpts/excerpt-en.pdf"
 
-# Note: With S3 website hosting, HTTPS on a custom domain requires CloudFront,
+# Note: With S3 website hosting, HTTPS on a custom domain requires Cloudflare,
 # which is not used in this configuration.

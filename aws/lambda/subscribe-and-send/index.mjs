@@ -32,6 +32,22 @@ export const handler = async (event) => {
   }
   try {
     // Helpers
+    function verifyHmacForPost() {
+      const secret = process.env.API_SHARED_SECRET || ''
+      if (!secret) return true
+      if (method !== 'POST') return true
+      try {
+        const ts = Number(event.headers?.['x-api-ts'] || event.headers?.['X-Api-Ts'] || 0)
+        const sig = String(event.headers?.['x-api-sig'] || event.headers?.['X-Api-Sig'] || '')
+        if (!ts || !sig) return false
+        const now = Math.floor(Date.now() / 1000)
+        if (Math.abs(now - ts) > 300) return false // 5 minute skew
+        const payload = typeof event.body === 'string' ? event.body : JSON.stringify(event.body || '')
+        const data = `${ts}.${method}.${path}.${payload}`
+        const expect = crypto.createHmac('sha256', secret).update(data).digest('hex')
+        return crypto.timingSafeEqual(Buffer.from(expect), Buffer.from(sig))
+      } catch { return false }
+    }
     async function verifyTurnstile(tsToken) {
       const secret = process.env.TURNSTILE_SECRET_KEY
       if (!secret) return true
@@ -92,6 +108,9 @@ export const handler = async (event) => {
     }
     // Handle pre-order submissions
     if (method === 'POST' && /\/preorder$/i.test(path)) {
+      if (!verifyHmacForPost()) {
+        return { statusCode: 401, body: 'Unauthorized' }
+      }
       const body = JSON.parse(event.body || '{}')
       const {
         email,
@@ -187,7 +206,121 @@ export const handler = async (event) => {
       return { statusCode: 200, body: JSON.stringify({ ok: true }) }
     }
 
+    if (method === 'POST' && /\/keynote$/i.test(path)) {
+      if (!verifyHmacForPost()) {
+        return { statusCode: 401, body: 'Unauthorized' }
+      }
+      const {
+        name = '',
+        email = '',
+        organization = '',
+        eventType = '',
+        eventDate = '',
+        message = '',
+        lang = 'fr',
+        tsToken = '',
+      } = JSON.parse(event.body || '{}')
+      if (!(await verifyTurnstile(tsToken))) {
+        return { statusCode: 400, body: 'Bot verification failed' }
+      }
+      if (!(await rateLimitIp(sourceIp))) {
+        return { statusCode: 429, body: 'Too many requests' }
+      }
+      const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      const escapeLines = (s = '') => esc(s).replace(/\n/g, '<br/>')
+      if (String(name).trim().length < 2) return { statusCode: 400, body: 'Invalid name' }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { statusCode: 400, body: 'Invalid email' }
+      if (String(organization).trim().length < 2) return { statusCode: 400, body: 'Invalid organization' }
+      if (String(eventType).trim().length < 2) return { statusCode: 400, body: 'Invalid eventType' }
+      if (String(eventDate).trim().length < 2) return { statusCode: 400, body: 'Invalid eventDate' }
+      if (String(message).trim().length < 5) return { statusCode: 400, body: 'Invalid message' }
+      const fromEmail = process.env.FROM_EMAIL
+      const toEmail = process.env.KEYNOTE_TO_EMAIL || process.env.LEADS_TO_EMAIL || process.env.FROM_EMAIL
+      if (!fromEmail || !toEmail) throw new Error('FROM_EMAIL (and optionally KEYNOTE_TO_EMAIL) must be set')
+      const subject =
+        lang === 'fr'
+          ? 'Demande de keynote — La Fabrique du Leader'
+          : 'Keynote request — The Leader’s Inner Forge'
+      const html = `
+        <h3>${esc(subject)}</h3>
+        <p><strong>Nom</strong>: ${esc(name)}</p>
+        <p><strong>Email</strong>: ${esc(email)}</p>
+        <p><strong>Organisation</strong>: ${esc(organization)}</p>
+        <p><strong>Type d’événement / Event type</strong>: ${esc(eventType)}</p>
+        <p><strong>Date / période</strong>: ${esc(eventDate)}</p>
+        <p><strong>Message</strong>: ${escapeLines(message)}</p>
+        ${sourceIp ? `<p><strong>IP</strong>: ${esc(sourceIp)}</p>` : ''}
+        <p><strong>Langue</strong>: ${esc(lang)}</p>
+      `
+      const transporter = getTransport()
+      await transporter.sendMail({
+        from: fromEmail,
+        to: toEmail,
+        subject,
+        html,
+        replyTo: email,
+      })
+      return { statusCode: 200, body: JSON.stringify({ ok: true }) }
+    }
+
+    if (method === 'POST' && /\/coaching$/i.test(path)) {
+      if (!verifyHmacForPost()) {
+        return { statusCode: 401, body: 'Unauthorized' }
+      }
+      const {
+        name = '',
+        email = '',
+        background = '',
+        goals = '',
+        availability = '',
+        lang = 'fr',
+        tsToken = '',
+      } = JSON.parse(event.body || '{}')
+      if (!(await verifyTurnstile(tsToken))) {
+        return { statusCode: 400, body: 'Bot verification failed' }
+      }
+      if (!(await rateLimitIp(sourceIp))) {
+        return { statusCode: 429, body: 'Too many requests' }
+      }
+      const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      const escapeLines = (s = '') => esc(s).replace(/\n/g, '<br/>')
+      if (String(name).trim().length < 2) return { statusCode: 400, body: 'Invalid name' }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { statusCode: 400, body: 'Invalid email' }
+      if (String(background).trim().length < 5) return { statusCode: 400, body: 'Invalid background' }
+      if (String(goals).trim().length < 5) return { statusCode: 400, body: 'Invalid goals' }
+      if (String(availability).trim().length < 2) return { statusCode: 400, body: 'Invalid availability' }
+      const fromEmail = process.env.FROM_EMAIL
+      const toEmail = process.env.COACHING_TO_EMAIL || process.env.LEADS_TO_EMAIL || process.env.FROM_EMAIL
+      if (!fromEmail || !toEmail) throw new Error('FROM_EMAIL (and optionally COACHING_TO_EMAIL) must be set')
+      const subject =
+        lang === 'fr'
+          ? 'Demande de coaching — La Fabrique du Leader'
+          : 'Coaching request — The Leader’s Inner Forge'
+      const html = `
+        <h3>${esc(subject)}</h3>
+        <p><strong>Nom</strong>: ${esc(name)}</p>
+        <p><strong>Email</strong>: ${esc(email)}</p>
+        <p><strong>Parcours / Background</strong>: ${escapeLines(background)}</p>
+        <p><strong>Objectifs / Goals</strong>: ${escapeLines(goals)}</p>
+        <p><strong>Disponibilités / Availability</strong>: ${esc(availability)}</p>
+        ${sourceIp ? `<p><strong>IP</strong>: ${esc(sourceIp)}</p>` : ''}
+        <p><strong>Langue</strong>: ${esc(lang)}</p>
+      `
+      const transporter = getTransport()
+      await transporter.sendMail({
+        from: fromEmail,
+        to: toEmail,
+        subject,
+        html,
+        replyTo: email,
+      })
+      return { statusCode: 200, body: JSON.stringify({ ok: true }) }
+    }
+
     if (method === 'POST') {
+      if (!verifyHmacForPost()) {
+        return { statusCode: 401, body: 'Unauthorized' }
+      }
       const { email, lang = 'fr', tsToken = '' } = JSON.parse(event.body || '{}')
       if (!(await verifyTurnstile(tsToken))) {
         return { statusCode: 400, body: 'Bot verification failed' }
@@ -214,11 +347,12 @@ export const handler = async (event) => {
       const secret = process.env.LINK_SIGNING_SECRET || ''
       if (!secret) throw new Error('LINK_SIGNING_SECRET not set')
       const sig = crypto.createHmac('sha256', secret).update(email).digest('hex')
-      const verifyPage = `${siteUrl}/download.html?e=${encodeURIComponent(email)}&sig=${sig}&lang=${encodeURIComponent(lang)}`
+      // Link now goes through site Worker proxy to Lambda (no download.html)
+      const verifyPage = `${siteUrl}/api/verify-excerpt?e=${encodeURIComponent(email)}&sig=${sig}&lang=${encodeURIComponent(lang)}`
 
       const subject = lang === 'fr' ? 'Votre extrait — La Fabrique du Leader' : "Your excerpt — The Leader’s Inner Forge"
-      const unsubUrl = `${siteUrl}/unsubscribe?e=${encodeURIComponent(email)}&sig=${sig}&lang=${encodeURIComponent(lang)}`
-      const oneClickUrl = `${siteUrl}/one-click-unsubscribe?e=${encodeURIComponent(email)}&sig=${sig}&lang=${encodeURIComponent(lang)}`
+      const unsubUrl = `${siteUrl}/api/unsubscribe?e=${encodeURIComponent(email)}&sig=${sig}&lang=${encodeURIComponent(lang)}`
+      const oneClickUrl = `${siteUrl}/api/one-click-unsubscribe?e=${encodeURIComponent(email)}&sig=${sig}&lang=${encodeURIComponent(lang)}`
       const companyNameFr = 'Zonzerigué Leadership International'
       const companyNameEn = 'Zonzerigué Leadership International'
       const addressFr = process.env.COMPANY_ADDRESS_FR || ''

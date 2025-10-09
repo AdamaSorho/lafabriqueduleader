@@ -19,9 +19,24 @@ function LangToggle({ lang, setLang }) {
   )
 }
 
-export default function Nav({ lang, setLang, strings, onOpenPreorder }) {
+export default function Nav({ lang, setLang, strings, onOpenPreorder, onNavigate, currentPage }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const closeMobile = () => setMobileOpen(false)
+  const beyondPath = lang === 'fr' ? '/au-dela-du-livre' : '/beyond-the-book'
+  const links = [
+    { key: 'why', label: lang === 'fr' ? 'Pourquoi' : 'Why', page: 'home', hash: '#why' },
+    { key: 'author', label: lang === 'fr' ? 'Auteur' : 'Author', page: 'home', hash: '#author' },
+    { key: 'about', label: lang === 'fr' ? 'À propos' : 'About', page: 'home', hash: '#about' },
+    { key: 'learn', label: lang === 'fr' ? 'Apprentissages' : 'Learn', page: 'home', hash: '#learn' },
+    { key: 'beyond', label: strings.nav?.beyond || (lang === 'fr' ? 'Au-delà du livre' : 'Beyond the Book'), page: 'beyond' },
+    { key: 'faq', label: 'FAQ', page: 'home', hash: '#faq' },
+  ]
+  const handleNav = (event, link) => {
+    if (!onNavigate) return
+    event.preventDefault()
+    closeMobile()
+    onNavigate(link.page, { hash: link.hash })
+  }
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
@@ -30,21 +45,21 @@ export default function Nav({ lang, setLang, strings, onOpenPreorder }) {
           <span className="font-semibold tracking-tight">{strings.hero.brand}</span>
         </div>
         <div className="hidden items-center gap-8 md:flex">
-          <a href="#why" className="text-sm font-medium text-gray-700 hover:text-black" onClick={closeMobile}>
-            {lang === 'fr' ? 'Pourquoi' : 'Why'}
-          </a>
-          <a href="#author" className="text-sm font-medium text-gray-700 hover:text-black" onClick={closeMobile}>
-            {lang === 'fr' ? 'Auteur' : 'Author'}
-          </a>
-          <a href="#about" className="text-sm font-medium text-gray-700 hover:text-black" onClick={closeMobile}>
-            {lang === 'fr' ? 'À propos' : 'About'}
-          </a>
-          <a href="#learn" className="text-sm font-medium text-gray-700 hover:text-black" onClick={closeMobile}>
-            {lang === 'fr' ? 'Apprentissages' : 'Learn'}
-          </a>
-          <a href="#faq" className="text-sm font-medium text-gray-700 hover:text-black" onClick={closeMobile}>
-            FAQ
-          </a>
+          {links.map((link) => {
+            const href = link.page === 'home' ? link.hash || '/' : beyondPath
+            const isActive = link.page === 'beyond' && currentPage === 'beyond'
+            return (
+              <a
+                key={link.key}
+                href={href}
+                onClick={(event) => handleNav(event, link)}
+                className={`text-sm font-medium transition ${isActive ? 'text-black' : 'text-gray-700 hover:text-black'}`}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {link.label}
+              </a>
+            )
+          })}
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -75,15 +90,22 @@ export default function Nav({ lang, setLang, strings, onOpenPreorder }) {
       {mobileOpen && (
         <div className="mx-auto block max-w-6xl px-4 pb-4 sm:px-6 lg:px-8 md:hidden">
           <div className="mt-2 grid gap-2 rounded-2xl border border-black/10 bg-white p-3">
-            <a href="#why" onClick={closeMobile} className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">{lang === 'fr' ? 'Pourquoi' : 'Why'}</a>
-            <a href="#author" onClick={closeMobile} className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">{lang === 'fr' ? 'Auteur' : 'Author'}</a>
-            <a href="#about" onClick={closeMobile} className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">{lang === 'fr' ? 'À propos' : 'About'}</a>
-            <a href="#learn" onClick={closeMobile} className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">{lang === 'fr' ? 'Apprentissages' : 'Learn'}</a>
-            <a href="#faq" onClick={closeMobile} className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">FAQ</a>
+            {links.map((link) => {
+              const href = link.page === 'home' ? link.hash || '/' : beyondPath
+              return (
+                <a
+                  key={link.key}
+                  href={href}
+                  onClick={(event) => handleNav(event, link)}
+                  className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  {link.label}
+                </a>
+              )
+            })}
           </div>
         </div>
       )}
     </header>
   )
 }
-
