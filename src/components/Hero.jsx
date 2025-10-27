@@ -1,11 +1,11 @@
-import img1 from "../assets/book.png";
-
 export default function Hero({
   strings,
   onOpenExcerpt,
   onOpenPreorder,
-  onOpenBookPreview,
+  lang = "fr",
 }) {
+  const isEn = String(lang || "").toLowerCase().startsWith("en");
+  const modelSrc = isEn ? "/assets/models/book-en.glb" : "/assets/models/book-fr.glb";
   return (
     <section className="relative isolate overflow-hidden bg-white pt-28 sm:pt-36">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -38,23 +38,20 @@ export default function Hero({
               >
                 {strings.hero.ctas.excerpt}
               </button>
-              <button
-                type="button"
-                onClick={onOpenBookPreview}
-                className="inline-flex items-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50"
-              >
-                {strings?.hero?.brand === "The Leader’s Inner Forge"
-                  ? "Preview book"
-                  : "Prévisualiser le livre"}
-              </button>
             </div>
           </div>
           <div className="relative">
-            <img
-              src={img1}
-              alt="Visuel de présentation"
-              // className="object-cover"
-            />
+            <model-viewer
+              src={modelSrc}
+              alt={isEn ? "Book preview" : "Aperçu du livre"}
+              camera-controls
+              auto-rotate
+              shadow-intensity="0.4"
+              environment-image="neutral"
+              poster="/assets/models/book-poster.svg"
+              style={{ width: "100%", height: "400px", background: "transparent" }}
+              className="w-full"
+            ></model-viewer>
             <div className="pointer-events-none absolute inset-0 -z-10 rounded-3xl bg-[radial-gradient(60%_80%_at_50%_0%,rgba(0,0,0,0.06),transparent)]" />
           </div>
         </div>

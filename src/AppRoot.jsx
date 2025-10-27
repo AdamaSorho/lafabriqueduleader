@@ -12,7 +12,6 @@ import FAQ from "./components/FAQ";
 import Contact from "./components/Contact";
 import ExcerptModal from "./components/ExcerptModal";
 import PreorderModal from "./components/PreorderModal";
-import BookPreviewModal from "./components/BookPreviewModal";
 import logo from "./assets/logo.png";
 import AuthorSection from "./components/AuthorSection";
 import BeyondTheBook from "./components/BeyondTheBook";
@@ -23,7 +22,6 @@ export default function AppRoot() {
   const { lang, setLang, strings } = useLang();
   const [excerptOpen, setExcerptOpen] = useState(false);
   const [preorderOpen, setPreorderOpen] = useState(false);
-  const [bookPreviewOpen, setBookPreviewOpen] = useState(false);
   const [keynoteOpen, setKeynoteOpen] = useState(false);
   const [coachingOpen, setCoachingOpen] = useState(false);
   const resolvePage = () => {
@@ -139,9 +137,9 @@ export default function AppRoot() {
           <>
             <Hero
               strings={strings}
+              lang={lang}
               onOpenExcerpt={() => setExcerptOpen(true)}
               onOpenPreorder={() => setPreorderOpen(true)}
-              onOpenBookPreview={() => setBookPreviewOpen(true)}
             />
             <Section
               id="why"
@@ -191,7 +189,6 @@ export default function AppRoot() {
               strings={strings}
               onOpenExcerpt={() => setExcerptOpen(true)}
               onOpenPreorder={() => setPreorderOpen(true)}
-              onOpenBookPreview={() => setBookPreviewOpen(true)}
             />
           </>
         ) : (
@@ -216,11 +213,6 @@ export default function AppRoot() {
       <ExcerptModal
         open={excerptOpen}
         onClose={() => setExcerptOpen(false)}
-        lang={lang}
-      />
-      <BookPreviewModal
-        open={bookPreviewOpen}
-        onClose={() => setBookPreviewOpen(false)}
         lang={lang}
       />
       <PreorderModal
