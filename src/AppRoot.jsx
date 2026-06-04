@@ -11,7 +11,7 @@ import Footer from "./components/Footer";
 import FAQ from "./components/FAQ";
 import Contact from "./components/Contact";
 import ExcerptModal from "./components/ExcerptModal";
-import PreorderModal from "./components/PreorderModal";
+import { orderUrl } from "./content";
 import logo from "./assets/logo.png";
 import AuthorSection from "./components/AuthorSection";
 import BeyondTheBook from "./components/BeyondTheBook";
@@ -21,7 +21,6 @@ import CoachingModal from "./components/CoachingModal";
 export default function AppRoot() {
   const { lang, setLang, strings } = useLang();
   const [excerptOpen, setExcerptOpen] = useState(false);
-  const [preorderOpen, setPreorderOpen] = useState(false);
   const [keynoteOpen, setKeynoteOpen] = useState(false);
   const [coachingOpen, setCoachingOpen] = useState(false);
   const resolvePage = () => {
@@ -48,23 +47,17 @@ export default function AppRoot() {
     }
   }, []);
 
-  // Redirect helpers: open preorder modal when visiting /preorder or ?preorder
+  // Redirect helpers: redirect /preorder or ?preorder to Amazon order page
   useEffect(() => {
     try {
       const url = new URL(window.location.href);
       const path = (url.pathname || "").replace(/\/+$/, "");
-      const isPreorderPath = /^\/(pre-?order|precommande|pre-commande)$/i.test(
+      const isPreorderPath = /^\/(pre-?order|precommande|pre-commande|order|commander)$/i.test(
         path
       );
-      const isPreorderQuery = url.searchParams.has("preorder");
+      const isPreorderQuery = url.searchParams.has("preorder") || url.searchParams.has("order");
       if (isPreorderPath || isPreorderQuery) {
-        const langParam =
-          url.searchParams.get("lang") || localStorage.getItem("lang");
-        const next = new URL(url.origin + "/");
-        if (langParam) next.searchParams.set("lang", langParam);
-        next.hash = "#contact";
-        window.history.replaceState({}, "", next.toString());
-        setPreorderOpen(true);
+        window.location.replace(orderUrl);
       }
     } catch (err) {
       console.log(err);
@@ -128,7 +121,6 @@ export default function AppRoot() {
         lang={lang}
         setLang={setLang}
         strings={strings}
-        onOpenPreorder={() => setPreorderOpen(true)}
         onNavigate={handleNavigate}
         currentPage={page}
       />
@@ -139,7 +131,6 @@ export default function AppRoot() {
               strings={strings}
               lang={lang}
               onOpenExcerpt={() => setExcerptOpen(true)}
-              onOpenPreorder={() => setPreorderOpen(true)}
             />
             <Section
               id="why"
@@ -148,7 +139,6 @@ export default function AppRoot() {
             >
               <Why
                 strings={strings}
-                onOpenPreorder={() => setPreorderOpen(true)}
               />
             </Section>
             <AuthorSection strings={strings} />
@@ -159,7 +149,6 @@ export default function AppRoot() {
             >
               <AboutBook
                 strings={strings}
-                onOpenPreorder={() => setPreorderOpen(true)}
               />
             </Section>
             <Section
@@ -188,7 +177,6 @@ export default function AppRoot() {
             <CTA
               strings={strings}
               onOpenExcerpt={() => setExcerptOpen(true)}
-              onOpenPreorder={() => setPreorderOpen(true)}
             />
           </>
         ) : (
@@ -213,11 +201,6 @@ export default function AppRoot() {
       <ExcerptModal
         open={excerptOpen}
         onClose={() => setExcerptOpen(false)}
-        lang={lang}
-      />
-      <PreorderModal
-        open={preorderOpen}
-        onClose={() => setPreorderOpen(false)}
         lang={lang}
       />
       <KeynoteModal

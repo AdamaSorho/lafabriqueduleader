@@ -1,4 +1,6 @@
-export default function AboutBook({ strings, onOpenPreorder }) {
+import { orderUrl } from '../content'
+
+export default function AboutBook({ strings }) {
   const { body = [], pillars = [], closing = '', cta = '' } = strings.about
   const formatInline = (text) => {
     const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -12,7 +14,7 @@ export default function AboutBook({ strings, onOpenPreorder }) {
       <div className="space-y-4 text-sm leading-7 text-gray-700">
         {body.map((p, i) => (<p key={i} dangerouslySetInnerHTML={formatInline(p)} />))}
         <p dangerouslySetInnerHTML={formatInline(closing)} />
-        <a href="#contact" onClick={(e) => { e.preventDefault(); onOpenPreorder?.(); }} className="inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50">{cta}</a>
+        <a href={orderUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50">{cta}</a>
       </div>
       <div className="grid content-start gap-4">
         {pillars.map((p, i) => (

@@ -1,4 +1,6 @@
-export default function Testimonials({ strings, onOpenExcerpt, onOpenPreorder }) {
+import { orderUrl } from '../content'
+
+export default function Testimonials({ strings, onOpenExcerpt }) {
   const quotes = strings.testimonials.quotes
   const intro = strings.testimonials.intro
   const outro = strings.testimonials.outro
@@ -27,7 +29,7 @@ export default function Testimonials({ strings, onOpenExcerpt, onOpenPreorder })
             {Array.isArray(outro) ? outro.map((p,i)=> (<p key={i}>{p}</p>)) : (<p>{outro}</p>)}
           </blockquote>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-            <a href="#contact" onClick={(e)=>{e.preventDefault(); onOpenPreorder?.();}} className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-black/90">{strings.hero.ctas.preorder}</a>
+            <a href={orderUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-black/90">{strings.hero.ctas.preorder}</a>
             <button type="button" onClick={onOpenExcerpt} className="inline-flex items-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50">{strings.hero.ctas.excerpt}</button>
           </div>
         </div>

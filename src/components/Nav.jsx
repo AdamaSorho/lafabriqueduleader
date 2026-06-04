@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import logo from '../assets/logo.png'
+import { orderUrl } from '../content'
 
 function LangToggle({ lang, setLang }) {
   return (
@@ -19,7 +20,7 @@ function LangToggle({ lang, setLang }) {
   )
 }
 
-export default function Nav({ lang, setLang, strings, onOpenPreorder, onNavigate, currentPage }) {
+export default function Nav({ lang, setLang, strings, onNavigate, currentPage }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const closeMobile = () => setMobileOpen(false)
   const beyondPath = lang === 'fr' ? '/au-dela-du-livre' : '/beyond-the-book'
@@ -79,8 +80,9 @@ export default function Nav({ lang, setLang, strings, onOpenPreorder, onNavigate
           </button>
           <LangToggle lang={lang} setLang={setLang} />
           <a
-            href="#contact"
-            onClick={(e) => { e.preventDefault(); onOpenPreorder?.(); }}
+            href={orderUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center rounded-full bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-black/90"
           >
             {strings.nav?.preorder}
