@@ -16,7 +16,7 @@ const secret = process.env.LINK_SIGNING_SECRET
 const sig = crypto.createHmac('sha256', secret).update(email).digest('hex')
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const bundlePath = path.join(__dirname, 'dist', 'index.mjs')
+const bundlePath = path.join(__dirname, 'dist', 'index.cjs')
 
 const { handler } = await import(bundlePath)
 

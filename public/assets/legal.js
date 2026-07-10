@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
-  } catch (e) {
+  } catch {
     // fail silently to avoid breaking legal pages
   }
 });

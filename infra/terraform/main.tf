@@ -248,7 +248,10 @@ resource "aws_lambda_function" "api" {
       SMTP_PORT                 = tostring(var.smtp_port)
       SMTP_USER                 = var.smtp_user
       SMTP_PASS                 = var.smtp_pass
+      ORDER_TO_EMAIL            = var.order_to_email
       PREORDER_TO_EMAIL         = var.preorder_to_email
+      ORDER_WEBHOOK_URL         = var.order_webhook_url
+      LEADS_WEBHOOK_URL         = var.leads_webhook_url
       KEYNOTE_TO_EMAIL          = var.keynote_to_email
       COACHING_TO_EMAIL         = var.coaching_to_email
       LEADS_TO_EMAIL            = var.leads_to_email

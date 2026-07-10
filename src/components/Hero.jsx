@@ -1,4 +1,4 @@
-import { orderUrl } from '../content'
+import { trackEvent } from '../utils/tracking'
 
 export default function Hero({
   strings,
@@ -27,16 +27,18 @@ export default function Hero({
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
-                href={orderUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#commander"
+                onClick={() => trackEvent('order_click', { source: 'hero' })}
                 className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-black/90"
               >
                 {strings.hero.ctas.preorder}
               </a>
               <button
                 type="button"
-                onClick={onOpenExcerpt}
+                onClick={() => {
+                  trackEvent('excerpt_click', { source: 'hero' })
+                  onOpenExcerpt?.()
+                }}
                 className="inline-flex items-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50"
               >
                 {strings.hero.ctas.excerpt}

@@ -11,17 +11,19 @@ import Footer from "./components/Footer";
 import FAQ from "./components/FAQ";
 import Contact from "./components/Contact";
 import ExcerptModal from "./components/ExcerptModal";
-import { orderUrl } from "./content";
 import logo from "./assets/logo.png";
 import AuthorSection from "./components/AuthorSection";
 import BeyondTheBook from "./components/BeyondTheBook";
 import KeynoteModal from "./components/KeynoteModal";
 import CoachingModal from "./components/CoachingModal";
+import Audience from "./components/Audience";
+import GiftGroup from "./components/GiftGroup";
+import OrderOptions from "./components/OrderOptions";
 
 export default function AppRoot() {
   const { lang, setLang, strings } = useLang();
   const [excerptOpen, setExcerptOpen] = useState(false);
-  const [keynoteOpen, setKeynoteOpen] = useState(false);
+  const [keynoteRequest, setKeynoteRequest] = useState(null);
   const [coachingOpen, setCoachingOpen] = useState(false);
   const resolvePage = () => {
     const rawPath = window.location.pathname || "/";
@@ -47,7 +49,7 @@ export default function AppRoot() {
     }
   }, []);
 
-  // Redirect helpers: redirect /preorder or ?preorder to Amazon order page
+  // Redirect helpers: route legacy order URLs to the internal order section.
   useEffect(() => {
     try {
       const url = new URL(window.location.href);
@@ -57,7 +59,12 @@ export default function AppRoot() {
       );
       const isPreorderQuery = url.searchParams.has("preorder") || url.searchParams.has("order");
       if (isPreorderPath || isPreorderQuery) {
-        window.location.replace(orderUrl);
+        url.pathname = "/";
+        url.searchParams.delete("preorder");
+        url.searchParams.delete("order");
+        url.hash = "commander";
+        window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+        setPage("home");
       }
     } catch (err) {
       console.log(err);
@@ -141,6 +148,13 @@ export default function AppRoot() {
                 strings={strings}
               />
             </Section>
+            <Section
+              id="pour-qui"
+              eyebrow={strings.hero.brand}
+              title={strings.audience.title}
+            >
+              <Audience strings={strings} />
+            </Section>
             <AuthorSection strings={strings} />
             <Section
               id="about"
@@ -168,6 +182,37 @@ export default function AppRoot() {
               </ul>
             </Section>
             <Section
+              id="offrir-lire-groupe"
+              eyebrow={strings.hero.brand}
+              title={strings.giftGroup.title}
+            >
+              <GiftGroup strings={strings} lang={lang} />
+            </Section>
+            <Section
+              id="commander"
+              eyebrow={strings.order.eyebrow}
+              title={strings.order.title}
+            >
+              <OrderOptions strings={strings} lang={lang} />
+            </Section>
+            <Section
+              id="contact"
+              eyebrow={strings.contact.eyebrow}
+              title={strings.contact.title}
+            >
+              <Contact strings={strings} lang={lang} />
+            </Section>
+            <Section
+              id="testimonials"
+              eyebrow={strings.hero.brand}
+              title={strings.testimonials.title}
+            >
+              <Testimonials
+                strings={strings}
+                onOpenExcerpt={() => setExcerptOpen(true)}
+              />
+            </Section>
+            <Section
               id="faq"
               eyebrow={strings.hero.brand}
               title={strings.faq.title}
@@ -176,6 +221,7 @@ export default function AppRoot() {
             </Section>
             <CTA
               strings={strings}
+              lang={lang}
               onOpenExcerpt={() => setExcerptOpen(true)}
             />
           </>
@@ -183,19 +229,11 @@ export default function AppRoot() {
           <>
             <BeyondTheBook
               strings={strings}
-              lang={lang}
-              onOpenKeynote={() => setKeynoteOpen(true)}
+              onOpenKeynote={(section) => setKeynoteRequest(section)}
               onOpenCoaching={() => setCoachingOpen(true)}
             />
           </>
         )}
-        <Section
-          id="contact"
-          eyebrow={strings.footer.contact}
-          title={strings.footer.contact}
-        >
-          <Contact lang={lang} />
-        </Section>
       </main>
       <Footer strings={strings} lang={lang} />
       <ExcerptModal
@@ -204,9 +242,11 @@ export default function AppRoot() {
         lang={lang}
       />
       <KeynoteModal
-        open={keynoteOpen}
-        onClose={() => setKeynoteOpen(false)}
+        key={keynoteRequest?.id || "keynote"}
+        open={Boolean(keynoteRequest)}
+        onClose={() => setKeynoteRequest(null)}
         lang={lang}
+        requestContext={keynoteRequest}
       />
       <CoachingModal
         open={coachingOpen}

@@ -6,15 +6,15 @@ const dotClasses = {
   rose: 'bg-rose-500',
 }
 
-export default function BeyondTheBook({ strings, lang, onOpenKeynote, onOpenCoaching }) {
+export default function BeyondTheBook({ strings, onOpenKeynote, onOpenCoaching }) {
   const page = strings?.beyond
   if (!page) return null
-  const onCtaClick = (cta) => {
-    if (!cta) return
-    if (cta.type === 'keynote') {
-      onOpenKeynote?.()
-    } else if (cta.type === 'coaching') {
-      onOpenCoaching?.()
+  const onCtaClick = (section) => {
+    if (!section?.cta) return
+    if (section.cta.type === 'keynote') {
+      onOpenKeynote?.(section)
+    } else if (section.cta.type === 'coaching') {
+      onOpenCoaching?.(section)
     }
   }
 
@@ -35,7 +35,6 @@ export default function BeyondTheBook({ strings, lang, onOpenKeynote, onOpenCoac
       <section className="mx-auto mt-16 max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-6 sm:gap-8">
           {page.sections.map((section) => {
-            const isAction = section.cta?.type === 'keynote' || section.cta?.type === 'coaching'
             const isLink = section.cta?.type === 'link'
             const accentClass = dotClasses[section.cta?.accent] || 'bg-emerald-500'
             return (
@@ -80,7 +79,7 @@ export default function BeyondTheBook({ strings, lang, onOpenKeynote, onOpenCoac
                       ) : (
                         <button
                           type="button"
-                          onClick={() => onCtaClick(section.cta)}
+                          onClick={() => onCtaClick(section)}
                           className="inline-flex items-center rounded-full bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-black/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
                         >
                           {section.cta.button}

@@ -12,6 +12,18 @@ Parameters:
     Type: String
   FromEmail:
     Type: String
+  OrderToEmail:
+    Type: String
+    Default: ''
+  PreorderToEmail:
+    Type: String
+    Default: ''
+  OrderWebhookUrl:
+    Type: String
+    Default: ''
+  LeadsWebhookUrl:
+    Type: String
+    Default: ''
   MailchimpApiKey:
     Type: String
     Default: ''
@@ -57,12 +69,18 @@ Resources:
             - Effect: Allow
               Action:
                 - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:GetItem
               Resource:
                 - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DdbTable}
       Environment:
         Variables:
           SITE_URL: !Ref SiteUrl
           FROM_EMAIL: !Ref FromEmail
+          ORDER_TO_EMAIL: !Ref OrderToEmail
+          PREORDER_TO_EMAIL: !Ref PreorderToEmail
+          ORDER_WEBHOOK_URL: !Ref OrderWebhookUrl
+          LEADS_WEBHOOK_URL: !Ref LeadsWebhookUrl
           MAILCHIMP_API_KEY: !Ref MailchimpApiKey
           MAILCHIMP_SERVER_PREFIX: !Ref MailchimpServerPrefix
           MAILCHIMP_LIST_ID: !Ref MailchimpListId
@@ -74,6 +92,18 @@ Resources:
           Properties:
             ApiId: !Ref HttpApi
             Path: /subscribe-and-send
+            Method: POST
+        OrderEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /order
+            Method: POST
+        PreorderEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /preorder
             Method: POST
 
 Outputs:

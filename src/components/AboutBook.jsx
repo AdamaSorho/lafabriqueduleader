@@ -1,4 +1,4 @@
-import { orderUrl } from '../content'
+import { trackEvent } from '../utils/tracking'
 
 export default function AboutBook({ strings }) {
   const { body = [], pillars = [], closing = '', cta = '' } = strings.about
@@ -14,7 +14,13 @@ export default function AboutBook({ strings }) {
       <div className="space-y-4 text-sm leading-7 text-gray-700">
         {body.map((p, i) => (<p key={i} dangerouslySetInnerHTML={formatInline(p)} />))}
         <p dangerouslySetInnerHTML={formatInline(closing)} />
-        <a href={orderUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50">{cta}</a>
+        <a
+          href="#commander"
+          onClick={() => trackEvent('order_click', { source: 'about_section' })}
+          className="inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50"
+        >
+          {cta}
+        </a>
       </div>
       <div className="grid content-start gap-4">
         {pillars.map((p, i) => (
@@ -27,4 +33,3 @@ export default function AboutBook({ strings }) {
     </div>
   )
 }
-

@@ -15,7 +15,7 @@ La Fabrique du Leader n’est pas un simple manuel de management. C’est une fa
 
 Rencontrez Coach Zed
 ![Photo auteur]
-D. Zonzerigué Soro, connu comme Coach Zed, est fondateur de Zonzerigué Leadership International et auteur de La Fabrique du Leader.
+D. Zonzerigue Soro, connu comme Coach Zed, est fondateur de Zonzerigue Leadership International et auteur de La Fabrique du Leader.
 Conférencier et formateur, il accompagne depuis plus d’une décennie des dirigeants, entrepreneurs et organisations en Afrique et à l’international.
 Convaincu que le leadership véritable commence par une transformation intérieure, il aide chacun à développer la lucidité, l’alignement et la force de caractère nécessaires pour inspirer et transformer son environnement.
 À travers ses conférences, ses programmes et ses écrits, il incarne une vision exigeante et universelle du leadership : un chemin de croissance personnelle qui devient un impact collectif durable.
@@ -57,7 +57,7 @@ Précommandez La Fabrique du Leader et commencez à forger votre propre chemin i
 👉 [📖 Précommander maintenant] 👉 [🎁 Télécharger un extrait gratuit]
 
 Footer
-📩 Contact : [adresse email] 🔗 Suivez-nous : [icônes réseaux sociaux] © 2025 D. Zonzerigué Soro – Tous droits réservés
+📩 Contact : [adresse email] 🔗 Suivez-nous : [icônes réseaux sociaux] © 2025 D. Zonzerigue Soro – Tous droits réservés
 
 👉 Cette version est directement utilisable : chaque bloc peut être copié/collé dans Framer, et tu pourras ensuite travailler la mise en forme (polices, couleurs, spacing).
 Veux-tu que je propose aussi une version ultra-courte de la page (un “one-page résumé” de 5 sections max), utile si tu veux tester une variante plus minimaliste pour l’A/B testing ?
@@ -83,7 +83,7 @@ The Leader’s Inner Forge is not just another management manual. It is an inner
 
 Meet Coach Zed
 ![Author photo]
-D. Zonzerigué Soro, also known as Coach Zed, is the founder of Zonzerigué Leadership International and author of The Leader’s Inner Forge.
+D. Zonzerigue Soro, also known as Coach Zed, is the founder of Zonzerigue Leadership International and author of The Leader’s Inner Forge.
 A speaker and trainer, he has been working for over a decade with executives, entrepreneurs, and organizations across Africa and internationally.
 Convinced that true leadership begins with inner transformation, he helps people develop the clarity, alignment, and strength of character required to inspire and transform their environment.
 Through his talks, programs, and writings, he embodies a demanding yet universal vision of leadership: a journey of personal growth that becomes a collective impact.
@@ -125,4 +125,4 @@ Pre-order The Leader’s Inner Forge and begin forging your own inner path to tr
 👉 [📖 Pre-order now] 👉 [🎁 Download a free excerpt]
 
 Footer
-📩 Contact: [email address] 🔗 Follow us: [social media icons] © 2025 D. Zonzerigué Soro – All rights reserved
+📩 Contact: [email address] 🔗 Follow us: [social media icons] © 2025 D. Zonzerigue Soro – All rights reserved

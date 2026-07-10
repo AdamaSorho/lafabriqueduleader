@@ -17,7 +17,10 @@ provider:
   environment:
     SITE_URL: ${env:SITE_URL}
     FROM_EMAIL: ${env:FROM_EMAIL}
+    ORDER_TO_EMAIL: ${env:ORDER_TO_EMAIL, ''}
     PREORDER_TO_EMAIL: ${env:PREORDER_TO_EMAIL, ''}
+    ORDER_WEBHOOK_URL: ${env:ORDER_WEBHOOK_URL, ''}
+    LEADS_WEBHOOK_URL: ${env:LEADS_WEBHOOK_URL, ''}
     DDB_PREORDERS_TABLE: ${env:DDB_PREORDERS_TABLE, ''}
     DDB_TABLE: ${env:DDB_TABLE, ''}
     CORS_ORIGIN: ${env:CORS_ORIGIN, '*'}
@@ -36,6 +39,9 @@ functions:
       - httpApi:
           method: POST
           path: /preorder
+      - httpApi:
+          method: POST
+          path: /order
       - httpApi:
           method: GET
           path: /verify-excerpt

@@ -5,7 +5,8 @@ Overview
 - API endpoint: Lambda Function URL (Node.js 20)
 - Email sending: SMTP (e.g., Google Workspace/Gmail)
 - Optional storage: DynamoDB for excerpt/preorder records
-- Pre-order flow: modal posts to `POST /preorder`, emails your team, optional DynamoDB log
+- Order flow: the landing page posts to `POST /order`, emails your team, optionally logs to DynamoDB, and can forward to a Google Sheets/Airtable-style webhook
+- Legacy pre-order flow: modal posts to `POST /preorder`, emails your team, optional DynamoDB log
 
 Makefile shortcuts and local overrides
 - Use `make deploy-skip-build` to deploy quickly. These targets wrap `scripts/deploy-frontend.sh`.
@@ -26,7 +27,8 @@ Terraform workflow (recommended)
      - Ensure `enable_api = true` to provision the Lambda + API.
      - Optionally set `ddb_table` to create a DynamoDB table for excerpt signups (partition key: `email` [S]).
      - Optionally set `preorders_ddb_table` for pre-orders (recommended; prevents key collisions with signups).
-     - Optionally set `preorder_to_email` to route pre-order notifications to a specific inbox.
+     - Optionally set `order_to_email` and `preorder_to_email` to route order notifications to a specific inbox.
+     - Optionally set `order_webhook_url` or `leads_webhook_url` to forward submissions to Google Sheets, Airtable, Zapier, or another tracking table.
   2) Initialize/apply:
      - `terraform -chdir=infra/terraform init`
      - `terraform -chdir=infra/terraform apply`
@@ -78,9 +80,12 @@ Unsubscribe
 - IAM permissions: Lambda uses SMTP (no SES permissions required). Optionally grant DynamoDB `PutItem` if you enable persistence.
 - Environment variables set in Terraform:
   - `SITE_URL` e.g. https://yourdomain.com
-  - `FROM_EMAIL` e.g. Zonzerigué Leadership International <no-reply@yourdomain.com>
+  - `FROM_EMAIL` e.g. Zonzerigue Leadership International <no-reply@yourdomain.com>
     - Tip: use your legal org name as display name to match website/legal pages.
+  - `ORDER_TO_EMAIL` optional recipient for direct order requests
   - `PREORDER_TO_EMAIL` optional recipient for pre-order notifications
+  - `ORDER_WEBHOOK_URL` optional webhook for direct order requests
+  - `LEADS_WEBHOOK_URL` optional webhook for excerpt leads and fallback lead sync
   - `LINK_SIGNING_SECRET` for signed download links
   - `TURNSTILE_SECRET_KEY` for server-side bot verification (Cloudflare Turnstile)
   - Optional DynamoDB:
@@ -106,6 +111,11 @@ Optional: Store emails in DynamoDB
 - Pre-orders: create a separate table (e.g., `book_preorders`) and set `DDB_PREORDERS_TABLE=book_preorders` to avoid overwriting by PK.
 - Note: current schema uses only the hash key `email`. If you prefer a single-table design, switch to a composite key (e.g., add `sk` and use `email#timestamp`).
 
+Order endpoint
+- The same Lambda handles `POST /order` with payload:
+  - `{ fullName, email, whatsapp, cityCountry, orderType, quantity, preferredMode, customerType, message?, ambassadorCode?, lang? }`
+- On success, it emails your team, optionally logs to `DDB_PREORDERS_TABLE` (or `DDB_TABLE`), and optionally forwards the submission to `ORDER_WEBHOOK_URL`.
+
 Pre-order endpoint
 - The same Lambda handles `POST /preorder` with payload:
   - `{ name, email, phone?, format: 'print'|'digital', quantity, country?, notes?, lang? }`
@@ -127,6 +137,6 @@ Excerpt files (private access)
 - The frontend deploy excludes any `excerpt*.pdf` from upload to avoid public exposure.
 
 Notes on deliverability
-- Use a professional From like `Zonzerigué Leadership International <no-reply@lafabriqueduleader.com>`.
+- Use a professional From like `Zonzerigue Leadership International <no-reply@lafabriqueduleader.com>`.
 - Publish SPF and DMARC records for your domain; enable DKIM if using Google Workspace.
 - Emails include List‑Unsubscribe headers and a visible unsubscribe link; unsubscribes are honored by the API.

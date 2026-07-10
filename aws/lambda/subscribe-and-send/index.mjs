@@ -7,6 +7,16 @@ import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import crypto from 'crypto'
 
 let smtpTransport
+const contactEmail = 'contact@zonzerigueleadership.com'
+
+function includeContactRecipient(recipient) {
+  const recipients = Array.isArray(recipient) ? recipient : [recipient]
+  const alreadyIncluded = recipients.some((value) =>
+    String(value || '').toLowerCase().includes(contactEmail)
+  )
+  return alreadyIncluded ? recipients : [...recipients, contactEmail]
+}
+
 function getTransport() {
   if (smtpTransport) return smtpTransport
   const host = process.env.SMTP_HOST || 'smtp.gmail.com'
@@ -106,6 +116,165 @@ export const handler = async (event) => {
       }))
       return true
     }
+
+    async function sendLeadWebhook(kind, payload) {
+      const endpoint =
+        kind === 'order'
+          ? (process.env.ORDER_WEBHOOK_URL || process.env.LEADS_WEBHOOK_URL || '')
+          : (process.env.LEADS_WEBHOOK_URL || '')
+      if (!endpoint) return
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            kind,
+            receivedAt: new Date().toISOString(),
+            ...payload,
+          }),
+        })
+        if (!res.ok) {
+          console.warn(`Lead webhook ${kind} returned ${res.status}`)
+        }
+      } catch (err) {
+        console.warn(`Lead webhook ${kind} failed`, err)
+      }
+    }
+
+    // Handle direct order and grouped/institutional requests
+    if (method === 'POST' && /\/order$/i.test(path)) {
+      if (!verifyHmacForPost()) {
+        return { statusCode: 401, body: 'Unauthorized' }
+      }
+      const body = JSON.parse(event.body || '{}')
+      const {
+        fullName = '',
+        email = '',
+        whatsapp = '',
+        cityCountry = '',
+        orderType = '',
+        quantity = 1,
+        preferredMode = '',
+        customerType = '',
+        message = '',
+        ambassadorCode = '',
+        lang = 'fr',
+        tsToken = '',
+      } = body
+      if (!(await verifyTurnstile(tsToken))) {
+        return { statusCode: 400, body: 'Bot verification failed' }
+      }
+      if (!(await rateLimitIp(sourceIp))) {
+        return { statusCode: 429, body: 'Too many requests' }
+      }
+      if (String(fullName).trim().length < 2) return { statusCode: 400, body: 'Invalid name' }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { statusCode: 400, body: 'Invalid email' }
+      if (String(whatsapp).trim().length < 5) return { statusCode: 400, body: 'Invalid WhatsApp' }
+      if (String(cityCountry).trim().length < 2) return { statusCode: 400, body: 'Invalid location' }
+
+      const allowedOrderTypes = new Set(['single', 'duo', 'team', 'enterprise', 'special', 'amazon'])
+      const allowedModes = new Set(['delivery', 'pickup', 'amazon', 'other'])
+      const allowedCustomerTypes = new Set([
+        'individual',
+        'enterprise',
+        'school',
+        'institution',
+        'association',
+        'organization',
+        'other',
+      ])
+      const normalizedOrderType = allowedOrderTypes.has(String(orderType)) ? String(orderType) : 'single'
+      const normalizedMode = allowedModes.has(String(preferredMode)) ? String(preferredMode) : 'delivery'
+      const normalizedCustomerType = allowedCustomerTypes.has(String(customerType)) ? String(customerType) : 'individual'
+      const qty = Math.max(1, Math.min(5000, Number(quantity) || 1))
+
+      const signupTable = process.env.DDB_TABLE
+      const priorSignup = signupTable ? await getDdbItem(signupTable, email) : null
+      if (priorSignup && isSuppressed(priorSignup)) {
+        return { statusCode: 400, body: 'Address suppressed' }
+      }
+
+      const orderTable = process.env.DDB_PREORDERS_TABLE || process.env.DDB_TABLE
+      if (orderTable) {
+        const prior = await getDdbItem(orderTable, email)
+        const last = prior ? getLastTs(prior) : 0
+        if (last && (Date.now() - last) < WINDOW_MS) {
+          return { statusCode: 429, body: 'Too many requests' }
+        }
+      }
+
+      const fromEmail = process.env.FROM_EMAIL
+      const toEmail = process.env.ORDER_TO_EMAIL || process.env.PREORDER_TO_EMAIL || process.env.LEADS_TO_EMAIL || process.env.FROM_EMAIL
+      if (!fromEmail || !toEmail) throw new Error('FROM_EMAIL (and optionally ORDER_TO_EMAIL) must be set')
+
+      const isFr = lang === 'fr'
+      const subject = isFr
+        ? 'Nouvelle demande de commande — La Fabrique du Leader'
+        : 'New order request — The Leader’s Inner Forge'
+      const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      const escapeLines = (s = '') => esc(s).replace(/\n/g, '<br/>')
+      const html = `
+        <h3>${esc(subject)}</h3>
+        <p><strong>Nom</strong>: ${esc(fullName)}</p>
+        <p><strong>Email</strong>: ${esc(email)}</p>
+        <p><strong>WhatsApp</strong>: ${esc(whatsapp)}</p>
+        <p><strong>Ville / pays</strong>: ${esc(cityCountry)}</p>
+        <p><strong>Type de commande</strong>: ${esc(normalizedOrderType)}</p>
+        <p><strong>Quantité</strong>: ${qty}</p>
+        <p><strong>Mode préféré</strong>: ${esc(normalizedMode)}</p>
+        <p><strong>Profil</strong>: ${esc(normalizedCustomerType)}</p>
+        ${message ? `<p><strong>Message</strong>: ${escapeLines(message)}</p>` : ''}
+        ${ambassadorCode ? `<p><strong>Code ambassadeur / recommandation</strong>: ${esc(ambassadorCode)}</p>` : ''}
+        ${sourceIp ? `<p><strong>IP</strong>: ${esc(sourceIp)}</p>` : ''}
+        <p><strong>Langue</strong>: ${esc(lang)}</p>
+      `
+
+      const transporter = getTransport()
+      await transporter.sendMail({
+        from: fromEmail,
+        to: includeContactRecipient(toEmail),
+        subject,
+        html,
+        replyTo: email,
+      })
+
+      if (orderTable) {
+        const item = {
+          email: { S: String(email) },
+          name: { S: String(fullName) },
+          lang: { S: String(lang) },
+          ts: { N: String(Date.now()) },
+          status: { S: 'order_request' },
+          source: { S: 'order' },
+          orderType: { S: normalizedOrderType },
+          quantity: { N: String(qty) },
+          preferredMode: { S: normalizedMode },
+          customerType: { S: normalizedCustomerType },
+          cityCountry: { S: String(cityCountry) },
+          whatsapp: { S: String(whatsapp) },
+        }
+        if (message) item.message = { S: String(message) }
+        if (ambassadorCode) item.ambassadorCode = { S: String(ambassadorCode) }
+        await ddb.send(new PutItemCommand({ TableName: orderTable, Item: item }))
+      }
+
+      await sendLeadWebhook('order', {
+        fullName,
+        email,
+        whatsapp,
+        cityCountry,
+        orderType: normalizedOrderType,
+        quantity: qty,
+        preferredMode: normalizedMode,
+        customerType: normalizedCustomerType,
+        message,
+        ambassadorCode,
+        lang,
+      })
+
+      return { statusCode: 200, body: JSON.stringify({ ok: true }) }
+    }
+
     // Handle pre-order submissions
     if (method === 'POST' && /\/preorder$/i.test(path)) {
       if (!verifyHmacForPost()) {
@@ -237,10 +406,11 @@ export const handler = async (event) => {
       const fromEmail = process.env.FROM_EMAIL
       const toEmail = process.env.KEYNOTE_TO_EMAIL || process.env.LEADS_TO_EMAIL || process.env.FROM_EMAIL
       if (!fromEmail || !toEmail) throw new Error('FROM_EMAIL (and optionally KEYNOTE_TO_EMAIL) must be set')
+      const subjectType = String(eventType).replace(/[\r\n]+/g, ' ').trim().slice(0, 120)
       const subject =
         lang === 'fr'
-          ? 'Demande de keynote — La Fabrique du Leader'
-          : 'Keynote request — The Leader’s Inner Forge'
+          ? `Demande — ${subjectType} — La Fabrique du Leader`
+          : `Request — ${subjectType} — The Leader’s Inner Forge`
       const html = `
         <h3>${esc(subject)}</h3>
         <p><strong>Nom</strong>: ${esc(name)}</p>
@@ -255,7 +425,7 @@ export const handler = async (event) => {
       const transporter = getTransport()
       await transporter.sendMail({
         from: fromEmail,
-        to: toEmail,
+        to: includeContactRecipient(toEmail),
         subject,
         html,
         replyTo: email,
@@ -309,7 +479,7 @@ export const handler = async (event) => {
       const transporter = getTransport()
       await transporter.sendMail({
         from: fromEmail,
-        to: toEmail,
+        to: includeContactRecipient(toEmail),
         subject,
         html,
         replyTo: email,
@@ -321,7 +491,14 @@ export const handler = async (event) => {
       if (!verifyHmacForPost()) {
         return { statusCode: 401, body: 'Unauthorized' }
       }
-      const { email, lang = 'fr', tsToken = '' } = JSON.parse(event.body || '{}')
+      const {
+        email,
+        firstName = '',
+        whatsapp = '',
+        consent = false,
+        lang = 'fr',
+        tsToken = '',
+      } = JSON.parse(event.body || '{}')
       if (!(await verifyTurnstile(tsToken))) {
         return { statusCode: 400, body: 'Bot verification failed' }
       }
@@ -330,6 +507,12 @@ export const handler = async (event) => {
       }
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return { statusCode: 400, body: 'Invalid email' }
+      }
+      if (String(firstName).trim().length < 2) {
+        return { statusCode: 400, body: 'Invalid firstName' }
+      }
+      if (!consent) {
+        return { statusCode: 400, body: 'Consent required' }
       }
       const table = process.env.DDB_TABLE
       if (table) {
@@ -353,8 +536,8 @@ export const handler = async (event) => {
       const subject = lang === 'fr' ? 'Votre extrait — La Fabrique du Leader' : "Your excerpt — The Leader’s Inner Forge"
       const unsubUrl = `${siteUrl}/api/unsubscribe?e=${encodeURIComponent(email)}&sig=${sig}&lang=${encodeURIComponent(lang)}`
       const oneClickUrl = `${siteUrl}/api/one-click-unsubscribe?e=${encodeURIComponent(email)}&sig=${sig}&lang=${encodeURIComponent(lang)}`
-      const companyNameFr = 'Zonzerigué Leadership International'
-      const companyNameEn = 'Zonzerigué Leadership International'
+      const companyNameFr = 'Zonzerigue Leadership International'
+      const companyNameEn = 'Zonzerigue Leadership International'
       const addressFr = process.env.COMPANY_ADDRESS_FR || ''
       const addressEn = process.env.COMPANY_ADDRESS_EN || ''
       const privacyLink = lang === 'fr' ? `${siteUrl}/privacy.html` : `${siteUrl}/privacy-en.html`
@@ -362,17 +545,18 @@ export const handler = async (event) => {
       const footerText = lang === 'fr'
         ? `\n\n— ${companyNameFr}\nConfidentialité: ${privacyLink} | Mentions légales: ${termsLink}`
         : `\n\n— ${companyNameEn}\nPrivacy: ${privacyLink} | Legal: ${termsLink}`
+      const greeting = String(firstName).trim()
       const text = lang === 'fr'
-        ? `Bonjour,\n\nMerci pour votre intérêt. Téléchargez l’extrait ici : ${verifyPage}\n\nSi vous ne souhaitez plus recevoir d’emails liés au livre, désabonnez-vous ici : ${unsubUrl}${footerText}\n`
-        : `Hello,\n\nThanks for your interest. Download the excerpt here: ${verifyPage}\n\nIf you no longer wish to receive book-related emails, unsubscribe here: ${unsubUrl}${footerText}\n`
+        ? `Bonjour ${greeting},\n\nMerci pour votre intérêt. Téléchargez l’extrait ici : ${verifyPage}\n\nSi vous ne souhaitez plus recevoir d’emails liés au livre, désabonnez-vous ici : ${unsubUrl}${footerText}\n`
+        : `Hello ${greeting},\n\nThanks for your interest. Download the excerpt here: ${verifyPage}\n\nIf you no longer wish to receive book-related emails, unsubscribe here: ${unsubUrl}${footerText}\n`
       // No physical address in footer; keep privacy/terms links only
       const html = lang === 'fr'
-        ? `<p>Bonjour,</p>
+        ? `<p>Bonjour ${String(firstName).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')},</p>
            <p>Merci pour votre intérêt. Cliquez ici pour télécharger l’extrait : <a href="${verifyPage}">${verifyPage}</a></p>
            <p style="color:#6b7280;font-size:12px;margin-top:24px">Si vous ne souhaitez plus recevoir d’emails liés au livre, vous pouvez vous désabonner ici : <a href="${unsubUrl}">se désabonner</a>.</p>
            <p>— La Fabrique du Leader</p>
            <p style="color:#6b7280;font-size:12px;margin-top:12px">${companyNameFr}<br/>Confidentialité: <a href="${privacyLink}">voir la politique</a> · Mentions légales: <a href="${termsLink}">voir</a></p>`
-        : `<p>Hello,</p>
+        : `<p>Hello ${String(firstName).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')},</p>
            <p>Thanks for your interest. Click here to download the excerpt: <a href="${verifyPage}">${verifyPage}</a></p>
            <p style="color:#6b7280;font-size:12px;margin-top:24px">If you no longer wish to receive book‑related emails, you can unsubscribe here: <a href="${unsubUrl}">unsubscribe</a>.</p>
            <p>— The Leader’s Inner Forge</p>
@@ -401,13 +585,24 @@ export const handler = async (event) => {
           TableName: process.env.DDB_TABLE,
           Item: {
             email: { S: email },
+            firstName: { S: String(firstName) },
             lang: { S: lang },
             ts: { N: String(Date.now()) },
             status: { S: 'pending' },
             source: { S: 'excerpt' },
+            consent: { BOOL: true },
+            ...(whatsapp ? { whatsapp: { S: String(whatsapp) } } : {}),
           },
         }))
       }
+
+      await sendLeadWebhook('excerpt', {
+        firstName,
+        email,
+        whatsapp,
+        consent: true,
+        lang,
+      })
 
       return { statusCode: 200, body: JSON.stringify({ ok: true }) }
     }

@@ -1,7 +1,7 @@
-import { orderUrl } from '../content'
+import { trackEvent } from '../utils/tracking'
 
 export default function Testimonials({ strings, onOpenExcerpt }) {
-  const quotes = strings.testimonials.quotes
+  const quotes = strings.testimonials.quotes.slice(0, 3)
   const intro = strings.testimonials.intro
   const outro = strings.testimonials.outro
   return (
@@ -29,12 +29,26 @@ export default function Testimonials({ strings, onOpenExcerpt }) {
             {Array.isArray(outro) ? outro.map((p,i)=> (<p key={i}>{p}</p>)) : (<p>{outro}</p>)}
           </blockquote>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-            <a href={orderUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-black/90">{strings.hero.ctas.preorder}</a>
-            <button type="button" onClick={onOpenExcerpt} className="inline-flex items-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50">{strings.hero.ctas.excerpt}</button>
+            <a
+              href="#commander"
+              onClick={() => trackEvent('order_click', { source: 'testimonials_section' })}
+              className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-black/90"
+            >
+              {strings.hero.ctas.preorder}
+            </a>
+            <button
+              type="button"
+              onClick={() => {
+                trackEvent('excerpt_click', { source: 'testimonials_section' })
+                onOpenExcerpt?.()
+              }}
+              className="inline-flex items-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50"
+            >
+              {strings.hero.ctas.excerpt}
+            </button>
           </div>
         </div>
       )}
     </div>
   )
 }
-

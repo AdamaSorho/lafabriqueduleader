@@ -45,6 +45,24 @@ variable "preorder_to_email" {
   description = "Recipient address for pre-order notifications. Defaults to from_email when empty."
 }
 
+variable "order_to_email" {
+  type        = string
+  default     = ""
+  description = "Recipient address for direct order requests. Falls back to preorder_to_email, leads_to_email, or from_email."
+}
+
+variable "order_webhook_url" {
+  type        = string
+  default     = ""
+  description = "Optional webhook for order requests (Google Apps Script, Airtable automation, Zapier, etc.)."
+}
+
+variable "leads_webhook_url" {
+  type        = string
+  default     = ""
+  description = "Optional shared webhook for lead events such as excerpt requests."
+}
+
 variable "keynote_to_email" {
   type        = string
   default     = ""

@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import RequiredMark from './RequiredMark'
 
-export default function KeynoteModal({ open, onClose, lang }) {
+export default function KeynoteModal({ open, onClose, lang, requestContext }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [organization, setOrganization] = useState('')
-  const [eventType, setEventType] = useState('')
+  const [eventType, setEventType] = useState(requestContext?.title || '')
   const [eventDate, setEventDate] = useState('')
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState('idle')
@@ -13,6 +14,7 @@ export default function KeynoteModal({ open, onClose, lang }) {
   if (!open) return null
 
   const t = (fr, en) => (lang === 'fr' ? fr : en)
+  const modalTitle = requestContext?.title || t('Demander une intervention', 'Request an intervention')
 
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -108,7 +110,7 @@ export default function KeynoteModal({ open, onClose, lang }) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">
-              {t('Inviter Zonzerigue pour une conférence', 'Invite Zonzerigue for a Keynote')}
+              {modalTitle}
             </h3>
             <p className="mt-1 text-sm text-gray-600">
               {t(
@@ -124,7 +126,7 @@ export default function KeynoteModal({ open, onClose, lang }) {
         <form className="mt-4 grid gap-3 ts-keynote" onSubmit={onSubmit}>
           <div className="grid gap-1">
             <label htmlFor="keynote-name" className="text-xs font-medium text-gray-700">
-              {t('Nom', 'Name')}
+              {t('Nom', 'Name')}<RequiredMark />
             </label>
             <input
               id="keynote-name"
@@ -138,7 +140,7 @@ export default function KeynoteModal({ open, onClose, lang }) {
           </div>
           <div className="grid gap-1">
             <label htmlFor="keynote-email" className="text-xs font-medium text-gray-700">
-              Email
+              Email<RequiredMark />
             </label>
             <input
               id="keynote-email"
@@ -152,7 +154,7 @@ export default function KeynoteModal({ open, onClose, lang }) {
           </div>
           <div className="grid gap-1">
             <label htmlFor="keynote-organization" className="text-xs font-medium text-gray-700">
-              {t('Organisation', 'Organization')}
+              {t('Organisation', 'Organization')}<RequiredMark />
             </label>
             <input
               id="keynote-organization"
@@ -166,7 +168,7 @@ export default function KeynoteModal({ open, onClose, lang }) {
           </div>
           <div className="grid gap-1">
             <label htmlFor="keynote-event-type" className="text-xs font-medium text-gray-700">
-              {t('Type d’événement', 'Event type')}
+              {t('Type d’événement', 'Event type')}<RequiredMark />
             </label>
             <input
               id="keynote-event-type"
@@ -180,7 +182,7 @@ export default function KeynoteModal({ open, onClose, lang }) {
           </div>
           <div className="grid gap-1">
             <label htmlFor="keynote-event-date" className="text-xs font-medium text-gray-700">
-              {t('Date / période souhaitée', 'Desired date or timeframe')}
+              {t('Date / période souhaitée', 'Desired date or timeframe')}<RequiredMark />
             </label>
             <input
               id="keynote-event-date"
@@ -194,7 +196,7 @@ export default function KeynoteModal({ open, onClose, lang }) {
           </div>
           <div className="grid gap-1">
             <label htmlFor="keynote-message" className="text-xs font-medium text-gray-700">
-              {t('Votre message', 'Message')}
+              {t('Votre message', 'Message')}<RequiredMark />
             </label>
             <textarea
               id="keynote-message"

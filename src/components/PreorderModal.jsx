@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import RequiredMark from './RequiredMark'
 
 export default function PreorderModal({ open, onClose, lang }) {
   const [name, setName] = useState('')
@@ -49,11 +50,11 @@ export default function PreorderModal({ open, onClose, lang }) {
         <p className="mt-2 text-sm text-gray-600">{t('Remplissez ce formulaire et nous reviendrons vers vous pour finaliser la précommande.','Fill out this form and we’ll follow up to finalize your pre-order.')}</p>
         <form className="mt-4 grid gap-3 ts-preorder" onSubmit={onSubmit}>
           <div className="grid gap-1">
-            <label htmlFor="po-name" className="text-xs font-medium text-gray-700">{t('Nom','Name')}</label>
+            <label htmlFor="po-name" className="text-xs font-medium text-gray-700">{t('Nom','Name')}<RequiredMark /></label>
             <input id="po-name" type="text" value={name} onChange={(e)=>setName(e.target.value)} required className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none transition placeholder:text-gray-400 focus:ring-2 focus:ring-black/10" placeholder={t('Votre nom','Your name')} />
           </div>
           <div className="grid gap-1">
-            <label htmlFor="po-email" className="text-xs font-medium text-gray-700">Email</label>
+            <label htmlFor="po-email" className="text-xs font-medium text-gray-700">Email<RequiredMark /></label>
             <input id="po-email" type="email" value={email} onChange={(e)=>setEmail(e.target.value)} required className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none transition placeholder:text-gray-400 focus:ring-2 focus:ring-black/10" placeholder={t('vous@exemple.com','you@example.com')} />
           </div>
           <div className="grid gap-1">
@@ -62,15 +63,15 @@ export default function PreorderModal({ open, onClose, lang }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1">
-              <label htmlFor="po-format" className="text-xs font-medium text-gray-700">{t('Format','Format')}</label>
-              <select id="po-format" value={format} onChange={(e)=>setFormat(e.target.value)} className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-black/10">
+              <label htmlFor="po-format" className="text-xs font-medium text-gray-700">{t('Format','Format')}<RequiredMark /></label>
+              <select id="po-format" value={format} onChange={(e)=>setFormat(e.target.value)} required className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-black/10">
                 <option value="print">{t('Broché (papier)','Print')}</option>
                 <option value="digital">{t('Numérique (PDF/eBook)','Digital (PDF/eBook)')}</option>
               </select>
             </div>
             <div className="grid gap-1">
-              <label htmlFor="po-qty" className="text-xs font-medium text-gray-700">{t('Quantité','Quantity')}</label>
-              <input id="po-qty" type="number" min={1} max={1000} value={quantity} onChange={(e)=>setQuantity(e.target.value)} className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-black/10" />
+              <label htmlFor="po-qty" className="text-xs font-medium text-gray-700">{t('Quantité','Quantity')}<RequiredMark /></label>
+              <input id="po-qty" type="number" min={1} max={1000} value={quantity} onChange={(e)=>setQuantity(e.target.value)} required className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-black/10" />
             </div>
           </div>
           <div className="grid gap-1">

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import RequiredMark from './RequiredMark'
 
 export default function CoachingModal({ open, onClose, lang }) {
   const [name, setName] = useState('')
@@ -108,7 +109,7 @@ export default function CoachingModal({ open, onClose, lang }) {
         <form className="mt-4 grid gap-3 ts-coaching" onSubmit={onSubmit}>
           <div className="grid gap-1">
             <label htmlFor="coaching-name" className="text-xs font-medium text-gray-700">
-              {t('Nom', 'Name')}
+              {t('Nom', 'Name')}<RequiredMark />
             </label>
             <input
               id="coaching-name"
@@ -122,7 +123,7 @@ export default function CoachingModal({ open, onClose, lang }) {
           </div>
           <div className="grid gap-1">
             <label htmlFor="coaching-email" className="text-xs font-medium text-gray-700">
-              Email
+              Email<RequiredMark />
             </label>
             <input
               id="coaching-email"
@@ -136,7 +137,7 @@ export default function CoachingModal({ open, onClose, lang }) {
           </div>
           <div className="grid gap-1">
             <label htmlFor="coaching-background" className="text-xs font-medium text-gray-700">
-              {t('Parcours / contexte', 'Background / context')}
+              {t('Parcours / contexte', 'Background / context')}<RequiredMark />
             </label>
             <textarea
               id="coaching-background"
@@ -153,7 +154,7 @@ export default function CoachingModal({ open, onClose, lang }) {
           </div>
           <div className="grid gap-1">
             <label htmlFor="coaching-goals" className="text-xs font-medium text-gray-700">
-              {t('Objectifs', 'Goals')}
+              {t('Objectifs', 'Goals')}<RequiredMark />
             </label>
             <textarea
               id="coaching-goals"
@@ -170,7 +171,7 @@ export default function CoachingModal({ open, onClose, lang }) {
           </div>
           <div className="grid gap-1">
             <label htmlFor="coaching-availability" className="text-xs font-medium text-gray-700">
-              {t('Disponibilités / horizon', 'Availability / timing')}
+              {t('Disponibilités / horizon', 'Availability / timing')}<RequiredMark />
             </label>
             <input
               id="coaching-availability"

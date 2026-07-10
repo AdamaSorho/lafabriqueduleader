@@ -9,7 +9,7 @@ This repo includes three IaC options to deploy the API and static site on AWS.
 All options assume:
 - Static site is built separately (`npm run build`) and uploaded to S3 (served via the S3 website endpoint).
 - Emails are sent via SMTP (e.g., Google Workspace/Gmail App Password) or your chosen SMTP provider.
-- Optional DynamoDB storage of excerpt/preorder records.
+- Optional DynamoDB storage of excerpt/preorder/order records.
 
 ## Shared prerequisites
 - SMTP: create an App Password for the sending account (for Gmail/Workspace) and note user/password.
@@ -26,7 +26,7 @@ Files: `infra/terraform/*.tf`
   - `from_email` (e.g., `La Fabrique <no-reply@yourdomain.com>`) — used as From header
   - SMTP (optional for Gmail/Workspace): `smtp_host`, `smtp_port`, `smtp_user`, `smtp_pass`
   - `cors_origin` (e.g., your site URL)
-  - Optional `ddb_table` (excerpt signups), `preorders_ddb_table` (pre-orders), and `preorder_to_email`
+  - Optional `ddb_table` (excerpt signups), `preorders_ddb_table` (pre-orders and order requests), `preorder_to_email`, `order_to_email`, `order_webhook_url`, and `leads_webhook_url`
 
 - Commands:
   - `cd infra/terraform`
@@ -62,7 +62,7 @@ File: `infra/serverless/serverless.yml`
 
 - Configure environment variables:
   - Required: `SITE_URL`, `FROM_EMAIL`
-  - Optional: `PREORDER_TO_EMAIL`, `DDB_TABLE`, `DDB_PREORDERS_TABLE`, `TURNSTILE_SECRET_KEY`, `SMTP_*`
+  - Optional: `ORDER_TO_EMAIL`, `PREORDER_TO_EMAIL`, `ORDER_WEBHOOK_URL`, `LEADS_WEBHOOK_URL`, `DDB_TABLE`, `DDB_PREORDERS_TABLE`, `TURNSTILE_SECRET_KEY`, `SMTP_*`
 - Deploy: `cd infra/serverless && npx serverless deploy`
 - Resulting httpApi base URL becomes your `VITE_API_BASE`.
 

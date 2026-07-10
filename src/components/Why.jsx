@@ -1,4 +1,4 @@
-import { orderUrl } from '../content'
+import { trackEvent } from '../utils/tracking'
 
 export default function Why({ strings }) {
   const formatInline = (text) => {
@@ -17,10 +17,18 @@ export default function Why({ strings }) {
           <li key={b} className="rounded-2xl border border-black/10 p-4 text-sm text-gray-800" dangerouslySetInnerHTML={formatInline(b)} />
         ))}
       </ul>
-      <a href={orderUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50">
+      {strings.why.sales && (
+        <p className="rounded-2xl border border-black/10 bg-gray-50 p-4 text-sm leading-6 text-gray-800">
+          {strings.why.sales}
+        </p>
+      )}
+      <a
+        href="#commander"
+        onClick={() => trackEvent('order_click', { source: 'why_section' })}
+        className="inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50"
+      >
         {strings.why.cta}
       </a>
     </div>
   )
 }
-

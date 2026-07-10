@@ -11,7 +11,7 @@ site_url    = "http://<your-bucket>.s3-website-<region>.amazonaws.com"
 cors_origin = "http://<your-bucket>.s3-website-<region>.amazonaws.com"
 
 # FROM address used in emails (display name + address)
-from_email = "Zonzerigué Leadership International <no-reply@lafabriqueduleader.com>"
+from_email = "Zonzerigue Leadership International <no-reply@lafabriqueduleader.com>"
 # Google SMTP (use App Password on Gmail/Workspace)
 smtp_host = "smtp.gmail.com"
 smtp_port = 465
@@ -20,6 +20,12 @@ smtp_pass = "<app-password>"
 
 # Optional: where pre-order notifications are sent. If empty, FROM_EMAIL is used.
 preorder_to_email = "orders@lafabriqueduleader.com"
+# Optional: where direct order form notifications are sent. If empty, falls back to preorder/leads/from email.
+order_to_email = "orders@lafabriqueduleader.com"
+# Optional: webhook to sync order requests to Google Sheets, Airtable, Zapier, etc.
+order_webhook_url = ""
+# Optional: webhook to sync excerpt leads or other leads.
+leads_webhook_url = ""
 # Optional: dedicated inboxes for keynote/coaching leads. If empty, falls back to leads_to_email or from_email.
 keynote_to_email = "keynotes@lafabriqueduleader.com"
 coaching_to_email = "coaching@lafabriqueduleader.com"
