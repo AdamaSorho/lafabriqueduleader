@@ -9,7 +9,7 @@ const ORDER_MESSAGES = {
       'Nom et prénom :',
       'Commune / lieu de livraison ou de retrait :',
       '',
-      'Merci de m’indiquer les modalités de livraison et de m’envoyer le QR code Wave pour le paiement.',
+      'Merci de m’indiquer les modalités de livraison et de m’envoyer le numéro Wave pour le paiement.',
     ],
     duo: [
       'Bonjour,',
@@ -18,7 +18,7 @@ const ORDER_MESSAGES = {
       'Nom et prénom :',
       'Commune / lieu de livraison ou de retrait :',
       '',
-      'Merci de me confirmer le montant total, les modalités de livraison et de m’envoyer le QR code Wave pour le paiement.',
+      'Merci de me confirmer le montant total, les modalités de livraison et de m’envoyer le numéro Wave pour le paiement.',
     ],
     team: [
       'Bonjour,',
@@ -63,7 +63,7 @@ const ORDER_MESSAGES = {
       'Full name:',
       'District / delivery or pickup location:',
       '',
-      'Please let me know the delivery options and send me the Wave QR code for payment.',
+      'Please let me know the delivery options and send me the Wave number for payment.',
     ],
     duo: [
       'Hello,',
@@ -72,7 +72,7 @@ const ORDER_MESSAGES = {
       'Full name:',
       'District / delivery or pickup location:',
       '',
-      'Please confirm the total amount and delivery options, and send me the Wave QR code for payment.',
+      'Please confirm the total amount and delivery options, and send me the Wave number for payment.',
     ],
     team: [
       'Hello,',

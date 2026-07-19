@@ -35,7 +35,7 @@ export const content = {
     order: {
       eyebrow: 'Commande directe',
       title: 'Commander le livre',
-      intro: 'Choisissez votre offre puis poursuivez sur WhatsApp. Un message de commande sera préparé automatiquement et vous recevrez le QR code Wave pour finaliser le paiement.',
+      intro: 'Choisissez votre offre puis poursuivez sur WhatsApp. Un message de commande sera préparé automatiquement et vous recevrez le numéro Wave pour finaliser le paiement.',
       options: [
         {
           id: 'single',
@@ -363,7 +363,7 @@ export const content = {
     faq: {
       title: 'Questions fréquentes',
       items: [
-        { q: 'Comment commander le livre ?', a: 'Choisissez l’offre qui vous convient puis cliquez sur Commander sur WhatsApp. Une conversation avec La Fabrique du Leader s’ouvrira avec votre offre et la quantité déjà renseignées. Envoyez le message pour recevoir le QR code Wave et finaliser le paiement.' },
+        { q: 'Comment commander le livre ?', a: 'Choisissez l’offre qui vous convient puis cliquez sur Commander sur WhatsApp. Une conversation avec La Fabrique du Leader s’ouvrira avec votre offre et la quantité déjà renseignées. Envoyez le message pour recevoir le numéro Wave et finaliser le paiement.' },
         { q: 'Puis-je commander hors Amazon ?', a: 'Oui. Amazon reste une option disponible, notamment pour certains pays ou pour les personnes qui préfèrent ce canal. Mais vous pouvez également commander directement auprès de notre équipe, notamment pour les exemplaires dédicacés, les commandes groupées, les ventes locales, les organisations, les écoles ou les institutions.' },
         { q: 'Puis-je commander plusieurs exemplaires ?', a: 'Oui. Choisissez le pack duo, équipe, entreprise ou commande spéciale. WhatsApp s’ouvrira avec l’offre et la quantité correspondantes afin de poursuivre directement avec notre équipe.' },
         { q: 'Proposez-vous des packs pour équipes ou entreprises ?', a: 'Oui. Des packs peuvent être proposés pour les équipes, entreprises, institutions, écoles, associations, communautés ou groupes de lecture. Selon le besoin, le pack peut inclure simplement les livres, ou être complété par une masterclass, une intervention de l’auteur, un atelier ou un parcours de lecture guidée autour des thèmes du livre.' },
@@ -430,7 +430,7 @@ export const content = {
     order: {
       eyebrow: 'Direct order',
       title: 'Order the book',
-      intro: 'Choose your package and continue on WhatsApp. Your order message will be prepared automatically, and you will receive the Wave QR code to complete payment.',
+      intro: 'Choose your package and continue on WhatsApp. Your order message will be prepared automatically, and you will receive the Wave number to complete payment.',
       options: [
         {
           id: 'single',
@@ -753,7 +753,7 @@ export const content = {
     faq: {
       title: 'Frequently asked questions',
       items: [
-        { q: 'How can I order the book?', a: 'Choose the package that suits you, then click Order on WhatsApp. A conversation with La Fabrique du Leader will open with your package and quantity already filled in. Send the message to receive the Wave QR code and complete payment.' },
+        { q: 'How can I order the book?', a: 'Choose the package that suits you, then click Order on WhatsApp. A conversation with La Fabrique du Leader will open with your package and quantity already filled in. Send the message to receive the Wave number and complete payment.' },
         { q: 'Can I order outside Amazon?', a: 'Yes. Amazon remains available for some countries or for people who prefer that channel, but you can also order directly from our team, especially for signed copies, group orders, local sales, organizations, schools, and institutions.' },
         { q: 'Can I order several copies?', a: 'Yes. Choose the duo, team, company, or special-order package. WhatsApp will open with the matching package and quantity so you can continue directly with our team.' },
         { q: 'Do you offer team or company packs?', a: 'Yes. Packs can be created for teams, companies, institutions, schools, associations, communities, or reading groups. Depending on the need, the pack can include books only or be combined with a masterclass, author intervention, workshop, or guided reading journey.' },
