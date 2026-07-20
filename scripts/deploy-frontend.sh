@@ -100,12 +100,14 @@ echo "==> Syncing other static files (short cache)"
 aws s3 sync "$DIST_DIR" "s3://$BUCKET" \
   ${DRY_ARG[@]:-} \
   --delete \
-  --exclude 'assets/*' --exclude 'index.html' --exclude 'excerpt*.pdf' \
+  --exclude 'assets/*' --exclude 'index.html' --exclude '*/index.html' --exclude 'excerpt*.pdf' \
   --cache-control 'public,max-age=300' >/dev/null
 
-echo "==> Uploading index.html (no-cache)"
-aws s3 cp "$DIST_DIR/index.html" "s3://$BUCKET/index.html" \
+echo "==> Uploading localized index files (no-cache)"
+aws s3 cp "$DIST_DIR" "s3://$BUCKET" \
   ${DRY_ARG[@]:-} \
+  --recursive \
+  --exclude '*' --include 'index.html' --include '*/index.html' \
   --cache-control 'no-cache' >/dev/null
 
 echo "✅ Frontend deployed: http://$WEBSITE_ENDPOINT/"

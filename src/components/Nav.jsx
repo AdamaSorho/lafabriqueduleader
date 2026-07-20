@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import logo from '../assets/logo.png'
 import { trackEvent } from '../utils/tracking'
+import { getLocalizedPath } from '../seo'
+
+const logo = '/assets/images/zli-logo-256.webp'
 
 function LangToggle({ lang, setLang }) {
   return (
@@ -23,7 +25,8 @@ function LangToggle({ lang, setLang }) {
 export default function Nav({ lang, setLang, strings, onNavigate, currentPage }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const closeMobile = () => setMobileOpen(false)
-  const beyondPath = lang === 'fr' ? '/au-dela-du-livre' : '/beyond-the-book'
+  const homePath = getLocalizedPath('home', lang)
+  const beyondPath = getLocalizedPath('beyond', lang)
   const links = [
     { key: 'why', label: lang === 'fr' ? 'Pourquoi' : 'Why', page: 'home', hash: '#why' },
     { key: 'author', label: lang === 'fr' ? 'Auteur' : 'Author', page: 'home', hash: '#author' },
@@ -49,13 +52,13 @@ export default function Nav({ lang, setLang, strings, onNavigate, currentPage })
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2">
-          <img src={logo} alt={strings.hero.brand} className="h-7 w-auto" />
-          <span className="font-semibold tracking-tight">{strings.hero.brand}</span>
+        <div className="flex shrink-0 items-center gap-2">
+          <img src={logo} alt="" width="256" height="256" className="h-7 w-7" />
+          <span className="hidden font-semibold tracking-tight sm:inline">{strings.hero.brand}</span>
         </div>
         <div className="hidden items-center gap-5 md:flex lg:gap-8">
           {links.map((link) => {
-            const href = link.page === 'home' ? link.hash || '/' : beyondPath
+            const href = link.page === 'home' ? `${homePath}${link.hash || ''}` : beyondPath
             const isActive = link.page === 'beyond' && currentPage === 'beyond'
             return (
               <a
@@ -88,7 +91,7 @@ export default function Nav({ lang, setLang, strings, onNavigate, currentPage })
           </button>
           <LangToggle lang={lang} setLang={setLang} />
           <a
-            href={currentPage === 'home' ? '#commander' : '/#commander'}
+            href={`${homePath}#commander`}
             onClick={handleOrderNav}
             className="inline-flex items-center rounded-full bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-black/90"
           >
@@ -100,7 +103,7 @@ export default function Nav({ lang, setLang, strings, onNavigate, currentPage })
         <div className="mx-auto block max-w-6xl px-4 pb-4 sm:px-6 lg:px-8 md:hidden">
           <div className="mt-2 grid gap-2 rounded-2xl border border-black/10 bg-white p-3">
             {links.map((link) => {
-              const href = link.page === 'home' ? link.hash || '/' : beyondPath
+              const href = link.page === 'home' ? `${homePath}${link.hash || ''}` : beyondPath
               return (
                 <a
                   key={link.key}

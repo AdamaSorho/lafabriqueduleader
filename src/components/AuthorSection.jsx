@@ -1,4 +1,4 @@
-import author from '../assets/Soro.jpg'
+const author = '/assets/images/ds-zonzerigue-author-702x1024.avif'
 
 export default function AuthorSection({ strings }) {
   const paras = strings.author.body || []
@@ -15,7 +15,16 @@ export default function AuthorSection({ strings }) {
         <div className="overflow-hidden rounded-3xl border border-black/10 bg-neutral-950 text-white">
           <div className="grid md:grid-cols-2">
             <div className="relative bg-black">
-              <img src={author} alt="Coach Zed" className="h-[680px] w-full object-contain md:h-[760px] lg:h-[860px]" />
+              <img
+                src={author}
+                alt="DS Zonzerigue"
+                width="702"
+                height="1024"
+                loading="lazy"
+                decoding="async"
+                sizes="(min-width: 768px) 50vw, 100vw"
+                className="h-[680px] w-full object-contain md:h-[760px] lg:h-[860px]"
+              />
             </div>
             <div className="p-8 md:p-12">
               <h2 className="font-serif text-3xl italic tracking-tight text-white sm:text-4xl">{strings.author.title}</h2>
@@ -30,4 +39,3 @@ export default function AuthorSection({ strings }) {
     </section>
   )
 }
-

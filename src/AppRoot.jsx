@@ -11,7 +11,6 @@ import Footer from "./components/Footer";
 import FAQ from "./components/FAQ";
 import Contact from "./components/Contact";
 import ExcerptModal from "./components/ExcerptModal";
-import logo from "./assets/logo.png";
 import AuthorSection from "./components/AuthorSection";
 import BeyondTheBook from "./components/BeyondTheBook";
 import KeynoteModal from "./components/KeynoteModal";
@@ -19,65 +18,70 @@ import CoachingModal from "./components/CoachingModal";
 import Audience from "./components/Audience";
 import GiftGroup from "./components/GiftGroup";
 import OrderOptions from "./components/OrderOptions";
+import {
+  applyDocumentSeo,
+  getLocalizedPath,
+  getRouteContext,
+  normalizeLang,
+} from "./seo";
 
-export default function AppRoot() {
-  const { lang, setLang, strings } = useLang();
+export default function AppRoot({ initialPath, initialPage, initialLang }) {
+  const initialContext = getRouteContext(
+    initialPath || (typeof window !== "undefined" ? window.location.pathname : "/"),
+    initialLang
+  );
+  const { lang, setLang, strings } = useLang(initialLang || initialContext.lang);
   const [excerptOpen, setExcerptOpen] = useState(false);
   const [keynoteRequest, setKeynoteRequest] = useState(null);
   const [coachingOpen, setCoachingOpen] = useState(false);
-  const resolvePage = () => {
-    const rawPath = window.location.pathname || "/";
-    const path = rawPath.replace(/\/+$/, "") || "/";
-    if (path === "/beyond-the-book" || path === "/au-dela-du-livre") {
-      return "beyond";
-    }
-    return "home";
-  };
-  const [page, setPage] = useState(resolvePage);
+  const [page, setPage] = useState(initialPage || initialContext.page);
 
-  // Ensure favicon uses our logo
-  useEffect(() => {
-    try {
-      const existing = document.querySelector('link[rel="icon"]');
-      const link = existing || document.createElement("link");
-      link.rel = "icon";
-      link.type = "image/png";
-      link.href = logo;
-      if (!existing) document.head.appendChild(link);
-    } catch (err) {
-      console.log(err);
-    }
-  }, []);
-
-  // Redirect helpers: route legacy order URLs to the internal order section.
+  // Normalize legacy order and ?lang= URLs to their localized canonical paths.
   useEffect(() => {
     try {
       const url = new URL(window.location.href);
       const path = (url.pathname || "").replace(/\/+$/, "");
+      const requestedLang = url.searchParams.get("lang");
+      const nextLang = requestedLang ? normalizeLang(requestedLang) : lang;
       const isPreorderPath = /^\/(pre-?order|precommande|pre-commande|order|commander)$/i.test(
         path
       );
       const isPreorderQuery = url.searchParams.has("preorder") || url.searchParams.has("order");
       if (isPreorderPath || isPreorderQuery) {
-        url.pathname = "/";
+        url.pathname = getLocalizedPath("home", nextLang);
         url.searchParams.delete("preorder");
         url.searchParams.delete("order");
+        url.searchParams.delete("lang");
         url.hash = "commander";
         window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
         setPage("home");
+        setLang(nextLang);
+      } else if (requestedLang) {
+        const context = getRouteContext(url.pathname, lang);
+        url.pathname = getLocalizedPath(context.page, nextLang);
+        url.searchParams.delete("lang");
+        window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+        setPage(context.page);
+        setLang(nextLang);
       }
     } catch (err) {
       console.log(err);
     }
-  }, []);
+  }, [lang, setLang]);
 
   useEffect(() => {
     const onPop = () => {
-      setPage(resolvePage());
+      const context = getRouteContext(window.location.pathname, lang);
+      setPage(context.page);
+      setLang(context.lang);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, []);
+  }, [lang, setLang]);
+
+  useEffect(() => {
+    applyDocumentSeo(page, lang);
+  }, [page, lang]);
 
   useEffect(() => {
     if (page === "home") {
@@ -96,16 +100,16 @@ export default function AppRoot() {
   }, [page]);
 
   const handleNavigate = (nextPage, options = {}) => {
-    const search = window.location.search || "";
+    const nextUrl = new URL(window.location.href);
     const hash = options.hash || "";
-    const homePath = "/";
-    const beyondPath = lang === "fr" ? "/au-dela-du-livre" : "/beyond-the-book";
-    const nextPath = nextPage === "home" ? homePath : beyondPath;
-    const url = `${nextPath}${search}${hash || ""}`;
-    if (`${window.location.pathname}${search}${window.location.hash}` !== url) {
-      window.history.pushState({}, "", url);
+    nextUrl.pathname = getLocalizedPath(nextPage, lang);
+    nextUrl.searchParams.delete("lang");
+    nextUrl.hash = hash;
+    const nextLocation = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+    if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== nextLocation) {
+      window.history.pushState({}, "", nextLocation);
     } else {
-      window.history.replaceState({}, "", url);
+      window.history.replaceState({}, "", nextLocation);
     }
     setPage(nextPage);
     if (nextPage === "home") {
@@ -122,11 +126,23 @@ export default function AppRoot() {
     }
   };
 
+  const handleLanguageChange = (nextLangValue) => {
+    const nextLang = normalizeLang(nextLangValue);
+    if (nextLang === lang) return;
+
+    const nextUrl = new URL(window.location.href);
+    nextUrl.pathname = getLocalizedPath(page, nextLang);
+    nextUrl.searchParams.delete("lang");
+    const nextLocation = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+    window.history.pushState({}, "", nextLocation);
+    setLang(nextLang);
+  };
+
   return (
     <div className="min-h-full bg-white text-gray-900 font-sans">
       <Nav
         lang={lang}
-        setLang={setLang}
+        setLang={handleLanguageChange}
         strings={strings}
         onNavigate={handleNavigate}
         currentPage={page}

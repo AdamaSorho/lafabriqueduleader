@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml"
+>
+  <url>
+    <loc>https://lafabriqueduleader.com/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://lafabriqueduleader.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://lafabriqueduleader.com/en/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://lafabriqueduleader.com/" />
+  </url>
+  <url>
+    <loc>https://lafabriqueduleader.com/en/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://lafabriqueduleader.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://lafabriqueduleader.com/en/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://lafabriqueduleader.com/" />
+  </url>
+  <url>
+    <loc>https://lafabriqueduleader.com/au-dela-du-livre/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://lafabriqueduleader.com/au-dela-du-livre/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://lafabriqueduleader.com/beyond-the-book/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://lafabriqueduleader.com/au-dela-du-livre/" />
+  </url>
+  <url>
+    <loc>https://lafabriqueduleader.com/beyond-the-book/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://lafabriqueduleader.com/au-dela-du-livre/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://lafabriqueduleader.com/beyond-the-book/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://lafabriqueduleader.com/au-dela-du-livre/" />
+  </url>
+</urlset>

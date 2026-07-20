@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs",
+    "optimize:images": "node scripts/optimize-images.mjs",
     "build:lambda": "esbuild aws/lambda/subscribe-and-send/index.mjs --bundle --platform=node --target=node20 --format=cjs --outfile=aws/lambda/subscribe-and-send/dist/index.cjs",
     "build:lambda:ses-events": "echo 'SES events build removed'",
     "check:lambda": "npm run -s build:lambda && node aws/lambda/subscribe-and-send/check.mjs",
@@ -14,25 +15,26 @@
     "deploy:frontend": "bash scripts/deploy-frontend.sh"
   },
   "dependencies": {
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "nodemailer": "^6.9.14",
     "@aws-sdk/client-dynamodb": "^3.645.0",
-    "@aws-sdk/client-s3": "^3.645.0"
+    "@aws-sdk/client-s3": "^3.645.0",
+    "nodemailer": "^6.9.14",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
-    "esbuild": "^0.25.9",
     "@eslint/js": "^9.33.0",
     "@tailwindcss/vite": "^4.1.13",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.21",
+    "esbuild": "^0.25.9",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
     "postcss": "^8.5.6",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4.1.13",
     "vite": "^7.1.2"
   }
