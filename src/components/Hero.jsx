@@ -28,7 +28,7 @@ export default function Hero({
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
                 href="#commander"
-                onClick={() => trackEvent('order_click', { source: 'hero' })}
+                onClick={() => trackEvent('order_navigation_click', { source: 'hero' })}
                 className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-black/90"
               >
                 {strings.hero.ctas.preorder}

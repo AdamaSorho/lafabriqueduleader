@@ -38,6 +38,7 @@ Outputs:
 - `api_base_url` — use this as `VITE_API_BASE`
 - `site_website_endpoint` — your S3 website endpoint
 - `site_bucket` — S3 name for uploads
+- `ga_measurement_id` — GA4 Measurement ID injected into frontend builds
 
 After apply:
 - Upload `dist/` to the S3 bucket (or wire CI/CD).

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import RequiredMark from './RequiredMark'
+import { trackEvent } from '../utils/tracking'
 
 export default function KeynoteModal({ open, onClose, lang, requestContext }) {
   const [name, setName] = useState('')
@@ -76,6 +77,10 @@ export default function KeynoteModal({ open, onClose, lang, requestContext }) {
         }),
       })
       if (res.ok) {
+        trackEvent('beyond_form_submit', {
+          source: 'beyond_the_book',
+          request_type: requestContext?.id || 'intervention',
+        })
         setStatus('success')
         setFeedback(t('Merci ! Nous vous recontactons sous peu.', 'Thank you! We’ll be in touch shortly.'))
         setName('')

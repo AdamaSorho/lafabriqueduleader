@@ -31,7 +31,7 @@ export default function Testimonials({ strings, onOpenExcerpt }) {
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <a
               href="#commander"
-              onClick={() => trackEvent('order_click', { source: 'testimonials_section' })}
+              onClick={() => trackEvent('order_navigation_click', { source: 'testimonials_section' })}
               className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-black/90"
             >
               {strings.hero.ctas.preorder}

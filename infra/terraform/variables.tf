@@ -15,6 +15,18 @@ variable "site_url" {
   type = string
   description = "Public site URL used inside emails (e.g., https://domain or http://<bucket>.s3-website-<region>.amazonaws.com)" 
 }
+
+variable "ga_measurement_id" {
+  type        = string
+  default     = "G-HD2ZEDZG45"
+  description = "Public Google Analytics 4 Measurement ID injected into the frontend build."
+
+  validation {
+    condition     = can(regex("^G-[A-Z0-9]+$", var.ga_measurement_id))
+    error_message = "ga_measurement_id must be a valid GA4 Measurement ID such as G-XXXXXXXXXX."
+  }
+}
+
 variable "from_email" { 
   type = string
   description = "From address used for emails, e.g., 'La Fabrique <no-reply@domain.com>'" 

@@ -12,10 +12,13 @@ export default function OrderOptions({ strings, lang }) {
       quantity: option.quantity || 1,
       customer_type: option.customerType || '',
       source: 'order_section',
+      request_type: option.enterpriseRequest
+        ? 'enterprise_order'
+        : option.groupRequest
+          ? 'group_order'
+          : 'individual_order',
     }
-    trackEvent('order_click', payload)
-    if (option.groupRequest) trackEvent('group_request_click', payload)
-    if (option.enterpriseRequest) trackEvent('enterprise_request_click', payload)
+    trackEvent('whatsapp_order_click', payload)
   }
 
   return (
@@ -64,7 +67,12 @@ export default function OrderOptions({ strings, lang }) {
           href={orderUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => trackEvent('amazon_order_click', { source: 'order_section' })}
+          onClick={() => trackEvent('amazon_order_click', {
+            source: 'order_section',
+            order_type: 'amazon',
+            quantity: 1,
+            request_type: 'individual_order',
+          })}
           className="inline-flex shrink-0 items-center justify-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-900 transition hover:bg-gray-100"
         >
           {order.amazon.cta}

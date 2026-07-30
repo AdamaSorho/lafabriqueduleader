@@ -104,11 +104,17 @@ export default function Contact({ strings, lang, initialIntent }) {
       }
 
       const trackingPayload = {
+        source: 'contact_form',
         order_type: orderType,
         quantity: qty,
+        request_type:
+          orderType === 'enterprise' || ['enterprise', 'school', 'institution', 'organization'].includes(customerType)
+            ? 'enterprise_order'
+            : qty > 1 || ['duo', 'team', 'special'].includes(orderType)
+              ? 'group_order'
+              : 'individual_order',
         preferred_mode: preferredMode,
         customer_type: customerType,
-        ambassador_code: ambassadorCode || '',
         has_ambassador_code: Boolean(ambassadorCode),
       }
       trackEvent('order_form_submit', trackingPayload)

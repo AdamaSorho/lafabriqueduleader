@@ -5,7 +5,12 @@ export default function CTA({ strings, lang, onOpenExcerpt }) {
   const groupOption = strings.order.options.find((option) => option.id === 'team')
 
   const handleGroupOffer = () => {
-    trackEvent('group_request_click', { source: 'final_cta', order_type: 'team' })
+    trackEvent('whatsapp_order_click', {
+      source: 'final_cta',
+      order_type: groupOption.id,
+      quantity: groupOption.quantity,
+      request_type: 'group_order',
+    })
   }
 
   return (
@@ -16,7 +21,7 @@ export default function CTA({ strings, lang, onOpenExcerpt }) {
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#commander"
-            onClick={() => trackEvent('order_click', { source: 'final_cta' })}
+            onClick={() => trackEvent('order_navigation_click', { source: 'final_cta' })}
             className="inline-flex items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-100"
           >
             {strings.finalCta.ctas.preorder}

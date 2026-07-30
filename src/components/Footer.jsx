@@ -1,6 +1,6 @@
 const logo = '/assets/images/zli-logo-256.webp'
 
-export default function Footer({ strings, lang }) {
+export default function Footer({ strings, lang, analyticsConfigured, onOpenAnalyticsSettings }) {
   const email = strings.footer?.email
   const address = strings.footer?.address
   const phone = strings.footer?.phone
@@ -75,6 +75,14 @@ export default function Footer({ strings, lang }) {
             <a href={privacyHref} className="hover:text-black">{lang === 'fr' ? 'Confidentialité' : 'Privacy'}</a>
             <span aria-hidden>·</span>
             <a href={termsHref} className="hover:text-black">{lang === 'fr' ? 'Conditions' : 'Terms'}</a>
+            {analyticsConfigured && (
+              <>
+                <span aria-hidden>·</span>
+                <button type="button" onClick={onOpenAnalyticsSettings} className="hover:text-black">
+                  {lang === 'fr' ? 'Préférences cookies' : 'Cookie preferences'}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

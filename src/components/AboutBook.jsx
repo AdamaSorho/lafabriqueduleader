@@ -16,7 +16,7 @@ export default function AboutBook({ strings }) {
         <p dangerouslySetInnerHTML={formatInline(closing)} />
         <a
           href="#commander"
-          onClick={() => trackEvent('order_click', { source: 'about_section' })}
+          onClick={() => trackEvent('order_navigation_click', { source: 'about_section' })}
           className="inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50"
         >
           {cta}

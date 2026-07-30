@@ -24,7 +24,7 @@ export default function Why({ strings }) {
       )}
       <a
         href="#commander"
-        onClick={() => trackEvent('order_click', { source: 'why_section' })}
+        onClick={() => trackEvent('order_navigation_click', { source: 'why_section' })}
         className="inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50"
       >
         {strings.why.cta}

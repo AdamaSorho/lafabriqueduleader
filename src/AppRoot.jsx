@@ -18,12 +18,18 @@ import CoachingModal from "./components/CoachingModal";
 import Audience from "./components/Audience";
 import GiftGroup from "./components/GiftGroup";
 import OrderOptions from "./components/OrderOptions";
+import AnalyticsConsent from "./components/AnalyticsConsent";
 import {
   applyDocumentSeo,
   getLocalizedPath,
   getRouteContext,
   normalizeLang,
 } from "./seo";
+import {
+  ANALYTICS_READY_EVENT,
+  isAnalyticsConfigured,
+  trackPageView,
+} from "./utils/tracking";
 
 export default function AppRoot({ initialPath, initialPage, initialLang }) {
   const initialContext = getRouteContext(
@@ -34,6 +40,7 @@ export default function AppRoot({ initialPath, initialPage, initialLang }) {
   const [excerptOpen, setExcerptOpen] = useState(false);
   const [keynoteRequest, setKeynoteRequest] = useState(null);
   const [coachingOpen, setCoachingOpen] = useState(false);
+  const [analyticsSettingsOpen, setAnalyticsSettingsOpen] = useState(false);
   const [page, setPage] = useState(initialPage || initialContext.page);
 
   // Normalize legacy order and ?lang= URLs to their localized canonical paths.
@@ -81,6 +88,13 @@ export default function AppRoot({ initialPath, initialPage, initialLang }) {
 
   useEffect(() => {
     applyDocumentSeo(page, lang);
+  }, [page, lang]);
+
+  useEffect(() => {
+    const sendPageView = () => trackPageView({ page_language: lang });
+    sendPageView();
+    window.addEventListener(ANALYTICS_READY_EVENT, sendPageView);
+    return () => window.removeEventListener(ANALYTICS_READY_EVENT, sendPageView);
   }, [page, lang]);
 
   useEffect(() => {
@@ -251,7 +265,12 @@ export default function AppRoot({ initialPath, initialPage, initialLang }) {
           </>
         )}
       </main>
-      <Footer strings={strings} lang={lang} />
+      <Footer
+        strings={strings}
+        lang={lang}
+        analyticsConfigured={isAnalyticsConfigured()}
+        onOpenAnalyticsSettings={() => setAnalyticsSettingsOpen(true)}
+      />
       <ExcerptModal
         open={excerptOpen}
         onClose={() => setExcerptOpen(false)}
@@ -268,6 +287,11 @@ export default function AppRoot({ initialPath, initialPage, initialLang }) {
         open={coachingOpen}
         onClose={() => setCoachingOpen(false)}
         lang={lang}
+      />
+      <AnalyticsConsent
+        lang={lang}
+        open={analyticsSettingsOpen}
+        onClose={() => setAnalyticsSettingsOpen(false)}
       />
     </div>
   );

@@ -40,6 +40,7 @@ export default function ExcerptModal({ open, onClose, lang }) {
         trackEvent('excerpt_form_submit', {
           has_whatsapp: Boolean(whatsapp),
           source: 'excerpt_modal',
+          request_type: 'excerpt',
         })
         setFirstName('')
         setEmail('')

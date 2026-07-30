@@ -46,7 +46,7 @@ export default function Nav({ lang, setLang, strings, onNavigate, currentPage })
     if (!onNavigate) return
     event.preventDefault()
     closeMobile()
-    trackEvent('order_click', { source: 'nav' })
+    trackEvent('order_navigation_click', { source: 'nav' })
     onNavigate('home', { hash: '#commander' })
   }
   return (

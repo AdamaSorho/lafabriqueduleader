@@ -47,10 +47,10 @@ infra-apply:
 	@cd infra/terraform && AWS_PROFILE=$(PROFILE) terraform init -upgrade
 	@AWS_PROFILE=$(PROFILE) terraform -chdir=infra/terraform apply -auto-approve
 
-# Apply infra changes then deploy frontend (skip build for speed)
+# Apply infra changes, rebuild with Terraform outputs, then deploy frontend
 redeploy:
 	@$(MAKE) infra-apply PROFILE=$(PROFILE)
-	@AWS_PROFILE=$(PROFILE) SITE_BUCKET= scripts/deploy-frontend.sh --skip-build
+	@AWS_PROFILE=$(PROFILE) SITE_BUCKET= scripts/deploy-frontend.sh
 
 # Summarize recent signup records from DynamoDB
 # Examples:

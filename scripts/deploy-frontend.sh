@@ -22,10 +22,13 @@ Options:
 Env:
   AWS_PROFILE    Optional, AWS CLI profile to use
   SITE_BUCKET    Override S3 bucket name (skip Terraform for bucket)
+  VITE_GA_MEASUREMENT_ID
+                 Override the Terraform GA4 Measurement ID
 
 This script expects Terraform outputs in $TF_DIR to include:
   - site_bucket (S3 bucket name)
   - site_website_endpoint (S3 website endpoint)
+  - ga_measurement_id (GA4 Measurement ID)
 EOF
 }
 
@@ -45,6 +48,16 @@ need_cmd aws
 need_cmd npm
 
 pushd "$ROOT_DIR" >/dev/null
+
+if [[ -z "${VITE_GA_MEASUREMENT_ID:-}" ]]; then
+  VITE_GA_MEASUREMENT_ID=$(terraform -chdir="$TF_DIR" output -raw ga_measurement_id)
+fi
+if [[ ! "$VITE_GA_MEASUREMENT_ID" =~ ^G-[A-Z0-9]+$ ]]; then
+  echo "Invalid GA4 Measurement ID: $VITE_GA_MEASUREMENT_ID" >&2
+  exit 1
+fi
+export VITE_GA_MEASUREMENT_ID
+echo "GA4 Measurement ID: $VITE_GA_MEASUREMENT_ID"
 
 if [[ "$SKIP_BUILD" -ne 1 ]]; then
   echo "==> Installing deps and building (frontend)"

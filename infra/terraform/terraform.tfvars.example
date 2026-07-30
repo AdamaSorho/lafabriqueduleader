@@ -10,6 +10,9 @@ site_bucket_name = "<your-unique-s3-bucket-name>"
 site_url    = "http://<your-bucket>.s3-website-<region>.amazonaws.com"
 cors_origin = "http://<your-bucket>.s3-website-<region>.amazonaws.com"
 
+# Public GA4 Measurement ID used by the frontend build
+ga_measurement_id = "G-HD2ZEDZG45"
+
 # FROM address used in emails (display name + address)
 from_email = "Zonzerigue Leadership International <no-reply@lafabriqueduleader.com>"
 # Google SMTP (use App Password on Gmail/Workspace)

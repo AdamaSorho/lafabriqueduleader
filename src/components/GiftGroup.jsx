@@ -7,11 +7,13 @@ export default function GiftGroup({ strings, lang }) {
   const bulkOption = strings.order.options.find((option) => option.id === 'team')
   const teamOption = strings.order.options.find((option) => option.id === 'enterprise')
 
-  const handleClick = (intent, eventName) => {
-    trackEvent(eventName, {
+  const handleClick = (intent) => {
+    trackEvent('whatsapp_order_click', {
       order_type: intent.id || intent.orderType,
+      quantity: intent.quantity || 1,
       customer_type: intent.customerType,
       source: 'gift_group_section',
+      request_type: intent.enterpriseRequest ? 'enterprise_order' : 'group_order',
     })
   }
 
@@ -29,7 +31,7 @@ export default function GiftGroup({ strings, lang }) {
             })}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => handleClick(bulkOption, 'group_request_click')}
+            onClick={() => handleClick(bulkOption)}
             className="inline-flex items-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-black/90"
           >
             {block.ctas.bulk}
@@ -43,7 +45,7 @@ export default function GiftGroup({ strings, lang }) {
             })}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => handleClick(teamOption, 'enterprise_request_click')}
+            onClick={() => handleClick(teamOption)}
             className="inline-flex items-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
           >
             {block.ctas.team}

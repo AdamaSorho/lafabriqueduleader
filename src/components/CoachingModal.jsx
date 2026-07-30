@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import RequiredMark from './RequiredMark'
+import { trackEvent } from '../utils/tracking'
 
 export default function CoachingModal({ open, onClose, lang }) {
   const [name, setName] = useState('')
@@ -60,6 +61,10 @@ export default function CoachingModal({ open, onClose, lang }) {
         body: JSON.stringify({ name, email, background, goals, availability, lang, tsToken }),
       })
       if (res.ok) {
+        trackEvent('beyond_form_submit', {
+          source: 'beyond_the_book',
+          request_type: 'coaching',
+        })
         setStatus('success')
         setFeedback(t('Merci ! Nous vous recontactons sous peu.', 'Thank you! We’ll be in touch shortly.'))
         setName('')
