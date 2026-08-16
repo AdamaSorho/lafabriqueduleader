@@ -61,11 +61,11 @@ In **Admin > Data display > Events**, create or mark these exact event names as 
 
 Use a private browser window so there is no stored consent choice.
 
-1. Open the site on desktop and mobile. Confirm that no request to `googletagmanager.com` or `google-analytics.com` occurs before consent.
-2. Refuse analytics. Navigate and click an offer. Confirm that the Google tag remains unloaded.
-3. Open **Cookie preferences**, accept analytics, and connect Google Tag Assistant.
+1. Open the site on desktop and mobile. Confirm that the banner offers **Accept**, **Reject**, and **View preferences**, and that no request to `googletagmanager.com` or `google-analytics.com` occurs before consent.
+2. Open **View preferences** and confirm that essential cookies are always active. Return to a private window, choose **Reject**, navigate, and click an offer. Confirm that the Google tag remains unloaded.
+3. Open **Cookie preferences**, enable audience measurement, save the preferences, and connect Google Tag Assistant.
 4. Navigate between `/`, `/au-dela-du-livre/`, `/en/`, and `/beyond-the-book/`. Confirm one `page_view` per route change.
 5. Trigger each conversion once and confirm one event with the expected parameters in Tag Assistant and GA4 Realtime or DebugView.
-6. Reopen **Cookie preferences**, refuse analytics, and confirm that subsequent actions do not produce analytics events.
+6. Reopen **Cookie preferences**, disable audience measurement, save the preferences, and confirm that subsequent actions do not produce analytics events.
 
 The measurement is ready for release when the four key events appear once per action and their parameters match the selected offer or request.
