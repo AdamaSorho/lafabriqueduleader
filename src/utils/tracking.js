@@ -78,7 +78,7 @@ export function isAnalyticsConfigured() {
 }
 
 export function initializeAnalytics() {
-  if (typeof window === 'undefined' || getAnalyticsConsent() !== 'granted') return false
+  if (typeof window === 'undefined' || /^\/(?:en\/)?admin(?:\/|$)/.test(window.location.pathname) || getAnalyticsConsent() !== 'granted') return false
 
   const id = measurementId()
   if (!id) return false

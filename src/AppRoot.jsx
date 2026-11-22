@@ -19,6 +19,12 @@ import Audience from "./components/Audience";
 import GiftGroup from "./components/GiftGroup";
 import OrderOptions from "./components/OrderOptions";
 import AnalyticsConsent from "./components/AnalyticsConsent";
+import ResourceHub from "./components/ResourceHub";
+import CollectionPage from "./components/CollectionPage";
+import AdminPortal from "./components/AdminPortal";
+import { usePublishedContent } from "./hooks/usePublishedContent";
+import { setResourceQuery } from "./utils/resource-catalog";
+import { setMediaQuery } from "./utils/media-catalog";
 import {
   applyDocumentSeo,
   getLocalizedPath,
@@ -42,6 +48,8 @@ export default function AppRoot({ initialPath, initialPage, initialLang }) {
   const [coachingOpen, setCoachingOpen] = useState(false);
   const [analyticsSettingsOpen, setAnalyticsSettingsOpen] = useState(false);
   const [page, setPage] = useState(initialPage || initialContext.page);
+  const [navigationVersion, setNavigationVersion] = useState(0);
+  const { hub, status: contentStatus, reload: reloadContent } = usePublishedContent(lang);
 
   // Normalize legacy order and ?lang= URLs to their localized canonical paths.
   useEffect(() => {
@@ -81,6 +89,7 @@ export default function AppRoot({ initialPath, initialPage, initialLang }) {
       const context = getRouteContext(window.location.pathname, lang);
       setPage(context.page);
       setLang(context.lang);
+      setNavigationVersion((value) => value + 1);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
@@ -91,6 +100,7 @@ export default function AppRoot({ initialPath, initialPage, initialLang }) {
   }, [page, lang]);
 
   useEffect(() => {
+    if (page === "admin") return;
     const sendPageView = () => trackPageView({ page_language: lang });
     sendPageView();
     window.addEventListener(ANALYTICS_READY_EVENT, sendPageView);
@@ -98,26 +108,39 @@ export default function AppRoot({ initialPath, initialPage, initialLang }) {
   }, [page, lang]);
 
   useEffect(() => {
-    if (page === "home") {
-      const hash = window.location.hash;
-      if (hash) {
-        requestAnimationFrame(() => {
-          const target = document.querySelector(hash);
-          if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
-        });
+    if (page === "resources" || page === "media") return;
+    const frame = requestAnimationFrame(() => {
+      const hash = window.location.hash.slice(1);
+      let id = hash;
+      try { id = decodeURIComponent(hash); } catch { /* Keep malformed fragments harmless. */ }
+      const target = id ? document.getElementById(id) : null;
+      if (target) {
+        target.scrollIntoView({ behavior: "instant", block: "start" });
       } else {
-        window.scrollTo({ top: 0, behavior: "auto" });
+        window.scrollTo({ top: 0, behavior: "instant" });
       }
-    } else {
-      window.scrollTo({ top: 0, behavior: "auto" });
-    }
-  }, [page]);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [page, lang, navigationVersion, contentStatus]);
 
   const handleNavigate = (nextPage, options = {}) => {
     const nextUrl = new URL(window.location.href);
     const hash = options.hash || "";
     nextUrl.pathname = getLocalizedPath(nextPage, lang);
     nextUrl.searchParams.delete("lang");
+    if (nextPage === "resources") {
+      nextUrl.searchParams.delete("format");
+      if (options.resourceQuery) setResourceQuery(nextUrl, options.resourceQuery);
+      else if (page !== "resources") setResourceQuery(nextUrl);
+    } else if (nextPage === "media") {
+      if (page !== "media") { setResourceQuery(nextUrl); setMediaQuery(nextUrl); }
+      nextUrl.searchParams.delete("group");
+      nextUrl.searchParams.delete("topic");
+      if (options.mediaQuery) setMediaQuery(nextUrl, options.mediaQuery);
+    } else {
+      setResourceQuery(nextUrl);
+      nextUrl.searchParams.delete("format");
+    }
     nextUrl.hash = hash;
     const nextLocation = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
     if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== nextLocation) {
@@ -126,18 +149,7 @@ export default function AppRoot({ initialPath, initialPage, initialLang }) {
       window.history.replaceState({}, "", nextLocation);
     }
     setPage(nextPage);
-    if (nextPage === "home") {
-      requestAnimationFrame(() => {
-        if (hash) {
-          const el = document.querySelector(hash);
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        } else {
-          window.scrollTo({ top: 0, behavior: "auto" });
-        }
-      });
-    } else {
-      window.scrollTo({ top: 0, behavior: "auto" });
-    }
+    setNavigationVersion((value) => value + 1);
   };
 
   const handleLanguageChange = (nextLangValue) => {
@@ -154,14 +166,15 @@ export default function AppRoot({ initialPath, initialPage, initialLang }) {
 
   return (
     <div className="min-h-full bg-white text-gray-900 font-sans">
-      <Nav
+      {page !== "admin" && <Nav
         lang={lang}
         setLang={handleLanguageChange}
         strings={strings}
         onNavigate={handleNavigate}
         currentPage={page}
-      />
-      <main>
+        hub={hub}
+      />}
+      <main id="main-content" tabIndex={-1}>
         {page === "home" ? (
           <>
             <Hero
@@ -169,6 +182,7 @@ export default function AppRoot({ initialPath, initialPage, initialLang }) {
               lang={lang}
               onOpenExcerpt={() => setExcerptOpen(true)}
             />
+            <ResourceHub lang={lang} onNavigate={handleNavigate} />
             <Section
               id="why"
               eyebrow={strings.hero.brand}
@@ -255,6 +269,19 @@ export default function AppRoot({ initialPath, initialPage, initialLang }) {
               onOpenExcerpt={() => setExcerptOpen(true)}
             />
           </>
+        ) : page === "admin" ? (
+          <AdminPortal lang={lang} />
+        ) : page === "resources" || page === "media" ? (
+          <CollectionPage
+            type={page}
+            lang={lang}
+            hub={hub}
+            status={contentStatus}
+            onRetry={reloadContent}
+            onNavigate={handleNavigate}
+            navigationVersion={navigationVersion}
+            onOpenExcerpt={() => setExcerptOpen(true)}
+          />
         ) : (
           <>
             <BeyondTheBook

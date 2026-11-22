@@ -5,7 +5,7 @@ import App from './AppRoot.jsx'
 import { getRouteContext } from './seo'
 import { initializeAnalytics } from './utils/tracking'
 
-initializeAnalytics()
+if (!/^\/(?:en\/)?admin(?:\/|$)/.test(window.location.pathname)) initializeAnalytics()
 
 const root = document.getElementById('root')
 const route = getRouteContext(window.location.pathname, document.documentElement.dataset.lang)

@@ -50,3 +50,10 @@ infra/terraform/*.tfplan
 
 # Local Makefile overrides (not committed)
 .make.local
+
+# Dedicated editorial infrastructure state and local configuration
+infra/content/.terraform/
+infra/content/terraform.tfstate*
+infra/content/*.tfvars
+infra/content/*.tfvars.json
+infra/content/*.tfplan

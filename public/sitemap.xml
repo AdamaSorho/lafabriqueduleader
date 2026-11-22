@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml"
->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://lafabriqueduleader.com/</loc>
     <xhtml:link rel="alternate" hreflang="fr" href="https://lafabriqueduleader.com/" />
@@ -26,5 +23,29 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://lafabriqueduleader.com/au-dela-du-livre/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://lafabriqueduleader.com/beyond-the-book/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://lafabriqueduleader.com/au-dela-du-livre/" />
+  </url>
+  <url>
+    <loc>https://lafabriqueduleader.com/ressources/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://lafabriqueduleader.com/ressources/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://lafabriqueduleader.com/resources/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://lafabriqueduleader.com/ressources/" />
+  </url>
+  <url>
+    <loc>https://lafabriqueduleader.com/resources/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://lafabriqueduleader.com/ressources/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://lafabriqueduleader.com/resources/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://lafabriqueduleader.com/ressources/" />
+  </url>
+  <url>
+    <loc>https://lafabriqueduleader.com/mediatheque/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://lafabriqueduleader.com/mediatheque/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://lafabriqueduleader.com/media/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://lafabriqueduleader.com/mediatheque/" />
+  </url>
+  <url>
+    <loc>https://lafabriqueduleader.com/media/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://lafabriqueduleader.com/mediatheque/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://lafabriqueduleader.com/media/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://lafabriqueduleader.com/mediatheque/" />
   </url>
 </urlset>

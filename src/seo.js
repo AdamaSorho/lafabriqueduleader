@@ -9,6 +9,9 @@ export const PAGE_PATHS = {
     fr: '/au-dela-du-livre/',
     en: '/beyond-the-book/',
   },
+  resources: { fr: '/ressources/', en: '/resources/' },
+  media: { fr: '/mediatheque/', en: '/media/' },
+  admin: { fr: '/admin/', en: '/en/admin/' },
 }
 
 const SOCIAL_IMAGE_PATHS = {
@@ -18,6 +21,17 @@ const SOCIAL_IMAGE_PATHS = {
 
 const SEO_COPY = {
   fr: {
+    resources: {
+      title: 'Ressources pour pratiquer le leadership | La Fabrique du Leader',
+      description: 'Pratiquer le leadership et comprendre ses tendances : exercices, réflexions, recherches et actualités de La Fabrique du Leader.',
+      imageAlt: 'Les ressources de La Fabrique du Leader',
+    },
+    media: {
+      title: 'Médiathèque | La Fabrique du Leader',
+      description: 'Les podcasts, vidéos, interviews, conférences et parutions de La Fabrique du Leader, réunis dans une médiathèque.',
+      imageAlt: 'La médiathèque de La Fabrique du Leader',
+    },
+    admin: { title: 'Administration | La Fabrique du Leader', description: 'Gestion des contenus de La Fabrique du Leader.', imageAlt: 'La Fabrique du Leader' },
     home: {
       title: 'La Fabrique du Leader | Livre de DS Zonzerigue',
       description: 'Découvrez La Fabrique du Leader de DS Zonzerigue, un guide pour développer un leadership lucide, aligné et profondément humain. Commandez le livre.',
@@ -30,6 +44,17 @@ const SEO_COPY = {
     },
   },
   en: {
+    resources: {
+      title: 'Leadership resources | The Leader’s Inner Forge',
+      description: 'Leadership in practice and leadership trends: exercises, reflection, research, and updates from La Fabrique.',
+      imageAlt: 'Resources from The Leader’s Inner Forge',
+    },
+    media: {
+      title: 'Media library | The Leader’s Inner Forge',
+      description: 'Explore the podcasts, videos, interviews, keynotes, and press coverage around The Leader’s Inner Forge.',
+      imageAlt: 'The Leader’s Inner Forge media library',
+    },
+    admin: { title: 'Administration | The Leader’s Inner Forge', description: 'Manage content for The Leader’s Inner Forge.', imageAlt: 'The Leader’s Inner Forge' },
     home: {
       title: 'The Leader’s Inner Forge | Book by DS Zonzerigue',
       description: 'Discover The Leader’s Inner Forge by DS Zonzerigue, a transformational guide to building lucid, grounded, and deeply human leadership.',
@@ -43,29 +68,29 @@ const SEO_COPY = {
   },
 }
 
-export const STATIC_ROUTES = [
-  { page: 'home', lang: 'fr', path: '/', output: 'index.html' },
-  { page: 'home', lang: 'en', path: '/en/', output: 'en/index.html' },
-  { page: 'beyond', lang: 'fr', path: '/au-dela-du-livre/', output: 'au-dela-du-livre/index.html' },
-  { page: 'beyond', lang: 'en', path: '/beyond-the-book/', output: 'beyond-the-book/index.html' },
-]
+export const STATIC_ROUTES = Object.entries(PAGE_PATHS).flatMap(([page, paths]) =>
+  Object.entries(paths).map(([lang, path]) => ({
+    page, lang, path, output: path === '/' ? 'index.html' : `${path.slice(1)}index.html`,
+  }))
+)
 
 export function normalizeLang(value) {
   return String(value || '').toLowerCase().startsWith('en') ? 'en' : 'fr'
 }
 
 export function getLocalizedPath(page, lang) {
-  const pageKey = page === 'beyond' ? 'beyond' : 'home'
+  const pageKey = Object.hasOwn(PAGE_PATHS, page) ? page : 'home'
   return PAGE_PATHS[pageKey][normalizeLang(lang)]
 }
 
 export function getRouteContext(pathname, fallbackLang = 'fr') {
   const path = `/${String(pathname || '/').replace(/^\/+|\/+$/g, '')}`
 
-  if (path === '/au-dela-du-livre') return { page: 'beyond', lang: 'fr' }
-  if (path === '/beyond-the-book') return { page: 'beyond', lang: 'en' }
-  if (path === '/en') return { page: 'home', lang: 'en' }
-  if (path === '/') return { page: 'home', lang: 'fr' }
+  for (const [page, paths] of Object.entries(PAGE_PATHS)) {
+    for (const [lang, localizedPath] of Object.entries(paths)) {
+      if (path === (localizedPath.replace(/\/$/, '') || '/')) return { page, lang }
+    }
+  }
 
   return { page: 'home', lang: normalizeLang(fallbackLang) }
 }
@@ -126,7 +151,7 @@ function buildStructuredData(page, lang, canonicalUrl) {
 }
 
 export function getSeo(page, lang) {
-  const pageKey = page === 'beyond' ? 'beyond' : 'home'
+  const pageKey = Object.hasOwn(PAGE_PATHS, page) ? page : 'home'
   const locale = normalizeLang(lang)
   const copy = SEO_COPY[locale][pageKey]
   const canonicalPath = getLocalizedPath(pageKey, locale)
@@ -134,6 +159,7 @@ export function getSeo(page, lang) {
 
   return {
     ...copy,
+    robots: pageKey === 'admin' ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
     page: pageKey,
     lang: locale,
     locale: locale === 'en' ? 'en_US' : 'fr_FR',
@@ -162,6 +188,7 @@ export function applyDocumentSeo(page, lang) {
   document.title = seo.title
 
   setMeta('meta[name="description"]', seo.description)
+  setMeta('meta[name="robots"]', seo.robots)
   setMeta('meta[property="og:title"]', seo.title)
   setMeta('meta[property="og:description"]', seo.description)
   setMeta('meta[property="og:url"]', seo.canonicalUrl)

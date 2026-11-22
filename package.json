@@ -12,11 +12,17 @@
     "check:lambda": "npm run -s build:lambda && node aws/lambda/subscribe-and-send/check.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy:frontend": "bash scripts/deploy-frontend.sh"
+    "deploy:frontend": "bash scripts/deploy-frontend.sh",
+    "build:content": "esbuild aws/lambda/content/index.mjs --bundle --platform=node --target=node22 --format=cjs --outfile=aws/lambda/content/dist/index.cjs",
+    "check:content": "node --test aws/lambda/content/handler.test.mjs src/utils/*.test.mjs",
+    "preview:editorial": "node scripts/preview-editorial.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.645.0",
     "@aws-sdk/client-s3": "^3.645.0",
+    "@tiptap/pm": "^3.33.1",
+    "@tiptap/react": "^3.33.1",
+    "@tiptap/starter-kit": "^3.33.1",
     "nodemailer": "^6.9.14",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

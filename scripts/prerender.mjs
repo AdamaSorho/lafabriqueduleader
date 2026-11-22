@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'vite'
-import { getSeo, STATIC_ROUTES } from '../src/seo.js'
+import { getSeo, STATIC_ROUTES, SITE_URL, getLocalizedPath } from '../src/seo.js'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = path.join(rootDir, 'dist')
@@ -30,7 +30,7 @@ function renderSeoHead(seo) {
   return [
     `<title>${title}</title>`,
     `<meta name="description" content="${description}">`,
-    '<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">',
+    `<meta name="robots" content="${seo.robots}">`,
     `<link rel="canonical" href="${seo.canonicalUrl}">`,
     `<link rel="alternate" hreflang="fr" href="${seo.frenchUrl}">`,
     `<link rel="alternate" hreflang="en" href="${seo.englishUrl}">`,
@@ -86,3 +86,15 @@ try {
 }
 
 console.log(`Prerendered ${STATIC_ROUTES.length} localized routes.`)
+
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${STATIC_ROUTES.filter((route) => route.page !== 'admin').map((route) => `  <url>
+    <loc>${SITE_URL}${route.path}</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="${SITE_URL}${getLocalizedPath(route.page, 'fr')}" />
+    <xhtml:link rel="alternate" hreflang="en" href="${SITE_URL}${getLocalizedPath(route.page, 'en')}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}${getLocalizedPath(route.page, 'fr')}" />
+  </url>`).join('\n')}
+</urlset>
+`
+await writeFile(path.join(distDir, 'sitemap.xml'), sitemap)

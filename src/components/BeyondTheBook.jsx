@@ -19,7 +19,7 @@ export default function BeyondTheBook({ strings, onOpenKeynote, onOpenCoaching }
   }
 
   return (
-    <div className="bg-white pt-28 pb-24 sm:pt-36">
+    <div className="bg-white pt-12 pb-24 sm:pt-20">
       <section className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="rounded-3xl border border-black/10 bg-white/70 p-10 shadow-sm ring-1 ring-black/5 backdrop-blur supports-[backdrop-filter]:bg-white/60">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-gray-500">

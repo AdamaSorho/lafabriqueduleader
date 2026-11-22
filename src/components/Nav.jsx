@@ -1,123 +1,146 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { trackEvent } from '../utils/tracking'
-import { getLocalizedPath } from '../seo'
+import { nexusUrl } from '../hub-content'
+import PageLink from './PageLink'
+import NewsTicker from './NewsTicker'
 
 const logo = '/assets/images/zli-logo-256.webp'
 
-function LangToggle({ lang, setLang }) {
-  return (
-    <div className="inline-flex rounded-full border border-black/10 p-0.5 text-xs">
-      {["fr", "en"].map((l) => (
-        <button
-          key={l}
-          onClick={() => setLang(l)}
-          className={`rounded-full px-2 py-1 ${
-            lang === l ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-50'
-          }`}
-        >
-          {l.toUpperCase()}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-export default function Nav({ lang, setLang, strings, onNavigate, currentPage }) {
+export default function Nav({ lang, setLang, strings, onNavigate, currentPage, hub }) {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const closeMobile = () => setMobileOpen(false)
-  const homePath = getLocalizedPath('home', lang)
-  const beyondPath = getLocalizedPath('beyond', lang)
-  const links = [
-    { key: 'why', label: lang === 'fr' ? 'Pourquoi' : 'Why', page: 'home', hash: '#why' },
-    { key: 'author', label: lang === 'fr' ? 'Auteur' : 'Author', page: 'home', hash: '#author' },
-    { key: 'about', label: lang === 'fr' ? 'À propos' : 'About', page: 'home', hash: '#about' },
-    { key: 'learn', label: lang === 'fr' ? 'Apprentissages' : 'Learn', page: 'home', hash: '#learn' },
-    { key: 'beyond', label: strings.nav?.beyond || (lang === 'fr' ? 'Au-delà du livre' : 'Beyond the Book'), page: 'beyond' },
-    { key: 'contact', label: 'Contact', page: 'home', hash: '#contact' },
-    { key: 'faq', label: 'FAQ', page: 'home', hash: '#faq' },
+  const [openGroup, setOpenGroup] = useState(null)
+  const headerRef = useRef(null)
+  const menuButtonRef = useRef(null)
+  const copy = hub.nav
+  const groups = [
+    {
+      id: 'book', label: copy.book, page: 'home',
+      links: [
+        { label: copy.why, hash: '#why' }, { label: copy.author, hash: '#author' },
+        { label: copy.about, hash: '#about' }, { label: copy.learn, hash: '#learn' },
+        { label: 'FAQ', hash: '#faq' },
+      ],
+    },
+    {
+      id: 'resources', label: copy.resources, page: 'resources',
+      links: [{ label: copy.allResources }, ...hub.resources.groups.filter((group) => hub.resources.entries.some((entry) => group.categoryIds.includes(entry.category))).map((item) => ({ label: item.title, hash: `#${item.id}` }))],
+    },
+    {
+      id: 'media', label: copy.media, page: 'media',
+      links: [{ label: copy.allMedia }, ...hub.media.categories.filter((category) => hub.media.entries.some((entry) => entry.category === category.id)).map((item) => ({ label: item.title, hash: `#${item.id}` }))],
+    },
+    {
+      id: 'beyond', label: strings.nav.beyond, page: 'beyond',
+      links: [{ label: copy.allBeyond }, ...strings.beyond.sections.map((item) => ({ label: item.title, hash: `#${item.id}` }))],
+    },
   ]
-  const handleNav = (event, link) => {
-    if (!onNavigate) return
-    event.preventDefault()
-    closeMobile()
-    onNavigate(link.page, { hash: link.hash })
+
+  useEffect(() => {
+    const header = headerRef.current
+    const observer = new ResizeObserver(() => {
+      document.documentElement.style.setProperty('--site-header-height', `${header.getBoundingClientRect().height}px`)
+    })
+    observer.observe(header)
+    return () => {
+      observer.disconnect()
+      document.documentElement.style.removeProperty('--site-header-height')
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!mobileOpen && !openGroup) return
+    const closeOutside = (event) => {
+      if (!headerRef.current?.contains(event.target)) {
+        setMobileOpen(false)
+        setOpenGroup(null)
+      }
+    }
+    const onEscape = (event) => {
+      if (event.key !== 'Escape') return
+      if (openGroup) {
+        headerRef.current?.querySelector(`#nav-${openGroup}-trigger`)?.focus()
+        setOpenGroup(null)
+      } else {
+        setMobileOpen(false)
+        menuButtonRef.current?.focus()
+      }
+    }
+    document.addEventListener('pointerdown', closeOutside)
+    document.addEventListener('keydown', onEscape)
+    return () => {
+      document.removeEventListener('pointerdown', closeOutside)
+      document.removeEventListener('keydown', onEscape)
+    }
+  }, [mobileOpen, openGroup])
+
+  const navigate = (page, options) => {
+    setMobileOpen(false)
+    setOpenGroup(null)
+    onNavigate(page, page === 'media' && !options?.hash?.startsWith('#entry-') ? { ...options, mediaQuery: {} } : options)
   }
-  const handleOrderNav = (event) => {
-    if (!onNavigate) return
-    event.preventDefault()
-    closeMobile()
-    trackEvent('order_navigation_click', { source: 'nav' })
-    onNavigate('home', { hash: '#commander' })
-  }
+
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex shrink-0 items-center gap-2">
-          <img src={logo} alt="" width="256" height="256" className="h-7 w-7" />
-          <span className="hidden font-semibold tracking-tight sm:inline">{strings.hero.brand}</span>
-        </div>
-        <div className="hidden items-center gap-5 md:flex lg:gap-8">
-          {links.map((link) => {
-            const href = link.page === 'home' ? `${homePath}${link.hash || ''}` : beyondPath
-            const isActive = link.page === 'beyond' && currentPage === 'beyond'
-            return (
-              <a
-                key={link.key}
-                href={href}
-                onClick={(event) => handleNav(event, link)}
-                className={`text-sm font-medium transition ${isActive ? 'text-black' : 'text-gray-700 hover:text-black'}`}
-                aria-current={isActive ? 'page' : undefined}
+    <header ref={headerRef} className="site-header">
+      <a className="skip-link" href="#main-content">{lang === 'fr' ? 'Aller au contenu' : 'Skip to content'}</a>
+      <nav className="site-nav" aria-label={lang === 'fr' ? 'Navigation principale' : 'Main navigation'}>
+        <PageLink page="home" lang={lang} onNavigate={navigate} className="site-brand" aria-label={`${strings.hero.brand} — ${copy.home}`}>
+          <img src={logo} alt="" width="256" height="256" />
+          <span>{strings.hero.brand}</span>
+        </PageLink>
+        <div id="primary-navigation" className={`nav-links ${mobileOpen ? 'is-open' : ''}`}>
+          {groups.map((group) => (
+            <div
+              key={group.id}
+              className="nav-group"
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) setOpenGroup((current) => current === group.id ? null : current)
+              }}
+            >
+              <button
+                id={`nav-${group.id}-trigger`}
+                type="button"
+                className={`nav-trigger ${currentPage === group.page ? 'is-current' : ''}`}
+                aria-expanded={openGroup === group.id}
+                aria-controls={`nav-${group.id}-links`}
+                onClick={() => setOpenGroup((current) => current === group.id ? null : group.id)}
               >
-                {link.label}
-              </a>
-            )
-          })}
+                {group.label}<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.5" /></svg>
+              </button>
+              <div id={`nav-${group.id}-links`} className="nav-dropdown" hidden={openGroup !== group.id}>
+                {group.links.map((link) => (
+                  <PageLink key={link.hash || 'all'} page={group.page} hash={link.hash} lang={lang} onNavigate={navigate} aria-current={currentPage === group.page && !link.hash ? 'page' : undefined}>
+                    {link.label}
+                  </PageLink>
+                ))}
+              </div>
+            </div>
+          ))}
+          <PageLink page="home" hash="#contact" lang={lang} onNavigate={navigate} className="nav-contact">Contact</PageLink>
+          {nexusUrl ? (
+            <a href={nexusUrl} className="nav-nexus">{copy.nexus}<span aria-hidden="true">↗</span></a>
+          ) : (
+            <span className="nav-nexus is-unavailable">{copy.nexus}<span className="nav-soon">{copy.soon}</span></span>
+          )}
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-full p-2 text-gray-700 hover:bg-gray-50 md:hidden"
-            aria-label={mobileOpen ? (lang === 'fr' ? 'Fermer le menu' : 'Close menu') : (lang === 'fr' ? 'Ouvrir le menu' : 'Open menu')}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((v) => !v)}
-          >
-            {mobileOpen ? (
-              <span className="text-xl leading-none">×</span>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
-                <path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z" />
-              </svg>
-            )}
+        <div className="nav-actions">
+          <div className="language-toggle" role="group" aria-label={lang === 'fr' ? 'Langue' : 'Language'}>
+            {['fr', 'en'].map((locale) => (
+              <button key={locale} type="button" lang={locale} aria-label={locale === 'fr' ? 'Français' : 'English'} aria-pressed={lang === locale} onClick={() => { setMobileOpen(false); setOpenGroup(null); setLang(locale) }}>
+                {locale.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <PageLink page="home" hash="#commander" lang={lang} onNavigate={navigate} onClick={() => trackEvent('order_navigation_click', { source: 'nav' })} className="nav-order">
+            {strings.nav.preorder}
+          </PageLink>
+          <button ref={menuButtonRef} type="button" className="nav-menu-toggle" aria-label={mobileOpen ? copy.close : copy.menu} aria-expanded={mobileOpen} aria-controls="primary-navigation" onClick={() => { setMobileOpen((value) => !value); setOpenGroup(null) }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              {mobileOpen ? <path d="m6 6 12 12M6 18 18 6" /> : <path d="M3 6h18M3 12h18M3 18h18" />}
+            </svg>
           </button>
-          <LangToggle lang={lang} setLang={setLang} />
-          <a
-            href={`${homePath}#commander`}
-            onClick={handleOrderNav}
-            className="inline-flex items-center rounded-full bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-black/90"
-          >
-            {strings.nav?.preorder}
-          </a>
         </div>
       </nav>
-      {mobileOpen && (
-        <div className="mx-auto block max-w-6xl px-4 pb-4 sm:px-6 lg:px-8 md:hidden">
-          <div className="mt-2 grid gap-2 rounded-2xl border border-black/10 bg-white p-3">
-            {links.map((link) => {
-              const href = link.page === 'home' ? `${homePath}${link.hash || ''}` : beyondPath
-              return (
-                <a
-                  key={link.key}
-                  href={href}
-                  onClick={(event) => handleNav(event, link)}
-                  className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  {link.label}
-                </a>
-              )
-            })}
-          </div>
-        </div>
-      )}
+      <NewsTicker copy={hub.ticker} lang={lang} onNavigate={navigate} />
     </header>
   )
 }

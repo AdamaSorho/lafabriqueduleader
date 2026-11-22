@@ -6,6 +6,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TF_DIR="$ROOT_DIR/infra/terraform"
 DIST_DIR="$ROOT_DIR/dist"
+CONTENT_TF_DIR="$ROOT_DIR/infra/content"
 
 SKIP_BUILD=0
 DRY_RUN=0
@@ -57,6 +58,13 @@ if [[ ! "$VITE_GA_MEASUREMENT_ID" =~ ^G-[A-Z0-9]+$ ]]; then
   exit 1
 fi
 export VITE_GA_MEASUREMENT_ID
+
+# Editorial configuration contains public identifiers only. Never export credentials.
+if [[ -f "$CONTENT_TF_DIR/terraform.tfstate" ]]; then
+  export VITE_CONTENT_API_BASE="${VITE_CONTENT_API_BASE:-$(terraform -chdir="$CONTENT_TF_DIR" output -raw api_base_url)}"
+  export VITE_ADMIN_AUTH_DOMAIN="${VITE_ADMIN_AUTH_DOMAIN:-$(terraform -chdir="$CONTENT_TF_DIR" output -raw admin_auth_domain)}"
+  export VITE_ADMIN_CLIENT_ID="${VITE_ADMIN_CLIENT_ID:-$(terraform -chdir="$CONTENT_TF_DIR" output -raw admin_client_id)}"
+fi
 echo "GA4 Measurement ID: $VITE_GA_MEASUREMENT_ID"
 
 if [[ "$SKIP_BUILD" -ne 1 ]]; then
@@ -104,7 +112,7 @@ if [[ -d "$DIST_DIR/assets" ]]; then
   aws s3 sync "$DIST_DIR/assets" "s3://$BUCKET/assets" \
     ${DRY_ARG[@]:-} \
     --cache-control 'public,max-age=31536000,immutable' \
-    --exclude '*' --include '*' >/dev/null
+    --exclude '*.DS_Store' >/dev/null
 else
   echo "==> No assets directory found; skipping assets sync"
 fi
@@ -113,7 +121,7 @@ echo "==> Syncing other static files (short cache)"
 aws s3 sync "$DIST_DIR" "s3://$BUCKET" \
   ${DRY_ARG[@]:-} \
   --delete \
-  --exclude 'assets/*' --exclude 'index.html' --exclude '*/index.html' --exclude 'excerpt*.pdf' \
+  --exclude 'assets/*' --exclude 'private/*' --exclude '*.DS_Store' --exclude 'index.html' --exclude '*/index.html' --exclude 'excerpt*.pdf' \
   --cache-control 'public,max-age=300' >/dev/null
 
 echo "==> Uploading localized index files (no-cache)"

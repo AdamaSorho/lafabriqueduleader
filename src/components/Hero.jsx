@@ -12,7 +12,7 @@ export default function Hero({
     ? "/assets/models/book-en.glb"
     : "/assets/models/book-fr.glb";
   return (
-    <section className="relative isolate overflow-hidden bg-white pt-28 sm:pt-36">
+    <section className="relative isolate overflow-hidden bg-white pt-12 pb-16 sm:pt-20 sm:pb-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
           <div className="max-w-xl">
